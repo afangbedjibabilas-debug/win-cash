@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WIN CASH — Prototype</title>
+<style>
+:root{--navy:#101d32;--navy2:#1c304b;--gold:#e5b956;--ink:#172033;--muted:#718096;--bg:#f3f5f8;--white:#fff}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+header{background:var(--navy);color:white;padding:18px 22px;display:flex;align-items:center;justify-content:space-between}
+.brand{font-weight:900;font-size:23px;letter-spacing:1px}.brand span{color:var(--gold)}
+.pill{font-size:11px;border:1px solid #6f8199;border-radius:20px;padding:5px 10px;color:#e7edf5}
+main{max-width:1050px;margin:26px auto;padding:0 16px}.hero{background:linear-gradient(120deg,var(--navy),#263f60);color:white;padding:26px;border-radius:18px}
+.hero h1{margin:0 0 8px;font-size:28px}.hero p{color:#d5dfeb;margin:0;line-height:1.5}
+.notice{margin-top:15px;background:#fff6df;border:1px solid #f0d58e;color:#72520b;padding:12px 14px;border-radius:12px;font-size:13px;line-height:1.45}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:18px 0}
+.card{background:white;border:1px solid #e5e9ef;border-radius:15px;padding:18px;box-shadow:0 4px 15px #17203308}
+.card small{color:var(--muted)}.number{font-size:25px;font-weight:800;margin-top:8px}.gold{color:#a77712}
+nav{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}
+button{border:0;border-radius:10px;padding:11px 15px;background:#e8edf3;color:#25334a;font-weight:700;cursor:pointer}
+button.active{background:var(--gold);color:#1d2633}
+.panel{display:none;background:white;border:1px solid #e5e9ef;border-radius:15px;padding:20px}.panel.active{display:block}
+h2{margin:0 0 12px;font-size:20px}.muted{color:var(--muted);font-size:14px;line-height:1.5}
+label{display:block;font-size:13px;font-weight:700;margin:12px 0 6px}
+input,select{width:100%;padding:12px;border:1px solid #d8dee8;border-radius:9px;font:inherit;background:white}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.action{background:var(--navy);color:white;margin-top:14px}
+table{width:100%;border-collapse:collapse;font-size:14px}td,th{text-align:left;padding:11px;border-bottom:1px solid #edf0f4}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:28px 12px}
+
+.header-left,.header-right{display:flex;align-items:center;gap:12px}
+.header-right{gap:9px}
+.menu-toggle{background:transparent;color:white;border:1px solid #60718a;font-size:22px;padding:7px 11px;border-radius:9px;line-height:1}
+.header-auth{background:var(--gold);color:#1d2633;padding:9px 13px;font-size:13px}
+.header-auth.login-top{background:transparent;color:white;border:1px solid #8795a8}
+.drawer-backdrop{position:fixed;inset:0;background:#07111fcc;z-index:20;opacity:0;visibility:hidden;transition:.22s}
+.side-drawer{position:fixed;z-index:21;left:0;top:0;height:100dvh;width:min(310px,86vw);background:#fff;padding:20px 16px;box-shadow:12px 0 35px #07111f30;transform:translateX(-105%);transition:transform .25s ease;overflow-y:auto}
+body.drawer-open .drawer-backdrop{opacity:1;visibility:visible}
+body.drawer-open .side-drawer{transform:translateX(0)}
+.drawer-heading{display:flex;align-items:center;justify-content:space-between;padding-bottom:20px;border-bottom:1px solid #e8edf3}
+.drawer-heading .brand{color:var(--navy)}
+.drawer-close{font-size:27px;background:#edf1f5;padding:3px 11px}
+.drawer-label{font-size:10px;letter-spacing:1px;font-weight:800;color:#8994a4;margin:22px 8px 8px}
+.drawer-link{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:transparent;color:#25334a;padding:13px 11px;border-radius:9px}
+.drawer-link:hover{background:#f1f4f8}
+.drawer-link span{font-size:19px;color:#a77712;font-weight:800;width:18px}
+.drawer-separator{height:1px;background:#e8edf3;margin:12px 4px}
+
+@media(max-width:650px){
+  header{padding:13px 12px;gap:8px}
+  .brand{font-size:19px}
+  .header-left,.header-right{gap:6px}
+  .header-right .pill{display:none}
+  .header-auth{font-size:11px;padding:8px 9px}
+  .menu-toggle{font-size:19px;padding:6px 9px}
+.grid{grid-template-columns:1fr}.row{grid-template-columns:1fr}.hero h1{font-size:23px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="header-left">
+    <button class="menu-toggle" id="menuToggle" type="button" aria-label="Ouvrir le menu" aria-expanded="false">☰</button>
+    <div class="brand">WIN <span>CASH</span></div>
+  </div>
+  <div class="header-right">
+    <button class="header-auth" type="button" data-open-tab="signup">Inscription</button>
+    <button class="header-auth login-top" type="button" data-open-tab="login">Connexion</button>
+    <div class="pill">PROTOTYPE • MODE DÉMO</div>
+  </div>
+</header>
+
+<div class="drawer-backdrop" id="drawerBackdrop"></div>
+<aside class="side-drawer" id="sideDrawer" aria-hidden="true">
+  <div class="drawer-heading">
+    <div class="brand">WIN <span>CASH</span></div>
+    <button class="drawer-close" id="drawerClose" type="button" aria-label="Fermer le menu">×</button>
+  </div>
+  <p class="drawer-label">OPÉRATIONS DU COMPTE</p>
+  <button class="drawer-link" type="button" data-open-tab="deposit"><span>＋</span> Dépôt</button>
+  <button class="drawer-link" type="button" data-open-tab="withdraw"><span>－</span> Retrait</button>
+  <div class="drawer-separator"></div>
+  <p class="drawer-label">NAVIGATION</p>
+  <button class="drawer-link" type="button" data-open-tab="invest">Accueil / Invest</button>
+  <button class="drawer-link" type="button" data-open-tab="sport">Sport</button>
+  <button class="drawer-link" type="button" data-open-tab="ref">Parrainage</button>
+  <button class="drawer-link" type="button" data-open-tab="account">Mon compte</button>
+  <button class="drawer-link" type="button" data-open-tab="admin">Administration</button>
+</aside>
+<main>
+<section class="hero"><h1>Bienvenue sur WIN CASH</h1><p>Une plateforme dédiée à la présentation de projets commerciaux et aux informations sportives.</p></section>
+<div class="notice"><b>Version de démonstration :</b> aucun dépôt, retrait, investissement réel ou pari en argent n'est effectué. Les montants et données affichés sont fictifs. Les services financiers et de paris ne pourront être activés qu'après validation juridique et obtention des autorisations nécessaires.</div>
+<section class="grid">
+<div class="card"><small>Solde de démonstration</small><div class="number">0 FCFA</div></div>
+<div class="card"><small>Parrainages de démonstration</small><div class="number">0</div></div>
+<div class="card"><small>Commissions simulées</small><div class="number gold">0 FCFA</div></div>
+</section>
+<nav>
+<button class="active" data-tab="invest">Accueil / Invest</button>
+<button data-tab="signup">Inscription</button>
+<button data-tab="login">Connexion</button>
+<button data-tab="sport">Sport</button>
+<button data-tab="ref">Parrainage</button>
+<button data-tab="account">Mon compte</button>
+<button data-tab="admin">Administration</button>
+</nav>
+<section id="invest" class="panel active"><h2>WIN CASH INVEST</h2><p class="muted">Découvrez les projets commerciaux, leurs responsables, les risques, les documents et les informations de suivi. Aucun placement réel n'est proposé dans cette maquette.</p><div class="card"><b>Exemple de fiche projet</b><p class="muted">Projet : achat-revente de marchandises<br>Statut : exemple fictif — dossier à compléter<br>Informations requises : budget, durée, risques, utilisation des fonds et modalités contractuelles.</p></div></section>
+<section id="signup" class="panel">
+<h2>Créer un compte</h2>
+<p class="muted">Formulaire de démonstration. Les informations ne sont pas enregistrées et aucun compte réel n'est créé à cette étape.</p>
+<div class="row"><div><label>Nom</label><input id="regLast" placeholder="Votre nom"></div><div><label>Prénom</label><input id="regFirst" placeholder="Votre prénom"></div></div>
+<label>Téléphone</label><input id="regPhone" placeholder="+228 ...">
+<label>Adresse e-mail</label><input id="regEmail" type="email" placeholder="nom@exemple.com">
+<label>Mot de passe</label><input id="regPassword" type="password" placeholder="Créer un mot de passe">
+<label>Code de parrainage (facultatif)</label><input id="regReferral" placeholder="Ex. WIN-ABC123">
+<button class="action" type="button" onclick="demoNotice('Inscription de démonstration : aucun compte réel n’a été créé.')">Créer mon compte (démo)</button>
+</section>
+<section id="login" class="panel">
+<h2>Connexion</h2>
+<p class="muted">Écran de connexion de démonstration. Il ne vérifie pas encore de véritables identifiants.</p>
+<label>Téléphone ou adresse e-mail</label><input id="loginIdentity" placeholder="Téléphone ou e-mail">
+<label>Mot de passe</label><input id="loginPassword" type="password" placeholder="Votre mot de passe">
+<button class="action" type="button" onclick="demoNotice('Connexion de démonstration uniquement : aucun compte réel n’est ouvert.')">Se connecter (démo)</button>
+</section>
+<section id="deposit" class="panel">
+  <h2>Effectuer un dépôt</h2>
+  <p class="muted">Interface de démonstration uniquement. Aucun paiement réel ne sera demandé ou effectué.</p>
+  <label>Montant du dépôt (FCFA)</label><input id="depositAmount" type="number" min="1" placeholder="Ex. 5 000">
+  <label>Moyen de paiement</label>
+  <select id="depositMethod"><option value="">Choisir un moyen de paiement</option><option>Mobile Money</option><option>Virement bancaire</option></select>
+  <button class="action" type="button" onclick="demoNotice('Dépôt en mode démo : aucune transaction réelle n’a été effectuée.')">Continuer (démo)</button>
+</section>
+<section id="withdraw" class="panel">
+  <h2>Effectuer un retrait</h2>
+  <p class="muted">Interface de démonstration uniquement. Aucun retrait réel n'est disponible dans cette version.</p>
+  <label>Montant du retrait (FCFA)</label><input id="withdrawAmount" type="number" min="1" placeholder="Ex. 5 000">
+  <label>Numéro de réception</label><input id="withdrawPhone" type="tel" placeholder="+228 ...">
+  <label>Moyen de retrait</label>
+  <select id="withdrawMethod"><option value="">Choisir un moyen de retrait</option><option>Mobile Money</option><option>Virement bancaire</option></select>
+  <button class="action" type="button" onclick="demoNotice('Retrait en mode démo : aucune transaction réelle n’a été effectuée.')">Continuer (démo)</button>
+</section>
+<section id="sport" class="panel"><h2>WIN CASH SPORT</h2><p class="muted">Calendrier de démonstration des rencontres publiées par l'administration. Les mises d'argent et les tickets de pari sont désactivés.</p><table id="publicMatches"><tr><th>Rencontre</th><th>Compétition</th><th>Date et heure</th><th>Statut</th></tr><tr><td colspan="4">Aucun match programmé pour le moment.</td></tr></table></section>
+<section id="ref" class="panel"><h2>Mon parrainage</h2><p class="muted">Un code de parrainage pourra être associé à chaque compte. Les éventuelles commissions ne sont pas calculées ni créditées dans cette version.</p><div class="card"><small>Votre code démo</small><div class="number">WIN-DEMO-001</div></div></section>
+<section id="account" class="panel"><h2>Mon compte</h2><div class="row"><div><label>Nom</label><input placeholder="Votre nom"></div><div><label>Prénom</label><input placeholder="Votre prénom"></div></div><label>Téléphone</label><input placeholder="+228 ..."><label>Adresse e-mail</label><input type="email" placeholder="nom@exemple.com"><p class="muted">Formulaire visuel uniquement : aucune donnée n'est enregistrée. L'authentification sécurisée sera ajoutée dans la prochaine étape.</p></section>
+<section id="admin" class="panel"><h2>Administration — aperçu</h2>
+<p class="muted">Cette maquette montre le formulaire de programmation des matchs. Dans la vraie plateforme, cet espace devra être protégé par une authentification administrateur.</p>
+<div class="card">
+<h2>Programmer un match</h2>
+<div class="row"><div><label>Équipe à domicile</label><input id="homeTeam" placeholder="Ex. Real Madrid"></div><div><label>Équipe visiteuse</label><input id="awayTeam" placeholder="Ex. FC Barcelone"></div></div>
+<label>Compétition / championnat</label><input id="competition" placeholder="Ex. Liga">
+<div class="row"><div><label>Date du match</label><input id="matchDate" type="date"></div><div><label>Heure du match</label><input id="matchTime" type="time"></div></div>
+<button class="action" type="button" onclick="addDemoMatch()">Ajouter le match (démo)</button>
+<p class="muted" id="matchFeedback">Les matchs ajoutés apparaîtront dans l'onglet Sport pendant cette session de démonstration.</p>
+</div>
+<h2 style="margin-top:20px">Matchs programmés</h2>
+<table id="adminMatches"><tr><th>Rencontre</th><th>Compétition</th><th>Date et heure</th><th>Statut</th></tr><tr><td colspan="4">Aucun match programmé.</td></tr></table>
+<table style="margin-top:18px"><tr><th>Autre module</th><th>État</th></tr><tr><td>Gestion des membres</td><td>À développer</td></tr><tr><td>Projets commerciaux</td><td>À développer</td></tr><tr><td>Demandes financières</td><td>Désactivé</td></tr></table>
+</section>
+<footer>WIN CASH • Prototype de conception • Données fictives uniquement</footer>
+</main>
+<script>
+const demoMatches = [];
+function demoNotice(message){ alert(message); }
+function escapeText(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function renderMatches(){
+ const rows = demoMatches.length
+  ? demoMatches.map(m=>`<tr><td>${escapeText(m.home)} – ${escapeText(m.away)}</td><td>${escapeText(m.competition)}</td><td>${escapeText(m.date)} ${escapeText(m.time)}</td><td>Programmé (démo)</td></tr>`).join('')
+  : '<tr><td colspan="4">Aucun match programmé pour le moment.</td></tr>';
+ document.getElementById('publicMatches').innerHTML='<tr><th>Rencontre</th><th>Compétition</th><th>Date et heure</th><th>Statut</th></tr>'+rows;
+ document.getElementById('adminMatches').innerHTML='<tr><th>Rencontre</th><th>Compétition</th><th>Date et heure</th><th>Statut</th></tr>'+rows;
+}
+function addDemoMatch(){
+ const home=document.getElementById('homeTeam').value.trim();
+ const away=document.getElementById('awayTeam').value.trim();
+ const competition=document.getElementById('competition').value.trim();
+ const date=document.getElementById('matchDate').value;
+ const time=document.getElementById('matchTime').value;
+ if(!home||!away||!competition||!date||!time){alert('Merci de renseigner les deux équipes, la compétition, la date et l’heure.');return;}
+ demoMatches.push({home,away,competition,date,time});
+ renderMatches();
+ document.getElementById('matchFeedback').textContent='Match ajouté à la liste de démonstration. Il est visible dans l’onglet Sport.';
+ ['homeTeam','awayTeam','competition','matchDate','matchTime'].forEach(id=>document.getElementById(id).value='');
+}
+
+function openTab(tab){
+  document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('active',x.dataset.tab===tab));
+  document.querySelectorAll('.panel').forEach(x=>x.classList.toggle('active',x.id===tab));
+  closeDrawer();
+}
+function closeDrawer(){
+  document.body.classList.remove('drawer-open');
+  document.getElementById('menuToggle').setAttribute('aria-expanded','false');
+  document.getElementById('sideDrawer').setAttribute('aria-hidden','true');
+}
+document.getElementById('menuToggle').addEventListener('click',()=>{
+  const isOpen=document.body.classList.toggle('drawer-open');
+  document.getElementById('menuToggle').setAttribute('aria-expanded',String(isOpen));
+  document.getElementById('sideDrawer').setAttribute('aria-hidden',String(!isOpen));
+});
+document.getElementById('drawerClose').addEventListener('click',closeDrawer);
+document.getElementById('drawerBackdrop').addEventListener('click',closeDrawer);
+document.querySelectorAll('[data-open-tab]').forEach(b=>b.addEventListener('click',()=>openTab(b.dataset.openTab)));
+document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>{
+ document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));
+ document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+ b.classList.add('active');document.getElementById(b.dataset.tab).classList.add('active');
+}));
+</script>
+</body></html>
