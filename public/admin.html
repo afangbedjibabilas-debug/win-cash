@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101d32">
+<title>WIN CASH — Administration</title>
+<style>
+:root{font-family:Inter,system-ui,Arial,sans-serif;color:#172033;background:#f3f5f8}
+*{box-sizing:border-box}body{margin:0}.top{background:#101d32;color:#fff;padding:22px 18px}.brand{font-size:24px;font-weight:850;letter-spacing:1px}.sub{opacity:.8;margin-top:5px}
+main{max-width:1050px;margin:26px auto;padding:0 16px}.head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.head h1{margin:0 0 5px;font-size:25px}
+button,.link{border:0;border-radius:9px;padding:11px 15px;background:#dcae49;color:#101d32;font-weight:750;font-size:14px;cursor:pointer;text-decoration:none}
+.secondary{background:#e8edf4;color:#26364d}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin:22px 0}
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:15px;padding:18px;box-shadow:0 7px 24px #14243a0a}
+.metric{font-size:30px;font-weight:800;margin-top:8px}.muted{color:#64748b;font-size:13px}
+.table-wrap{overflow:auto;margin-top:15px}table{width:100%;border-collapse:collapse;min-width:650px}th,td{text-align:left;padding:13px 10px;border-bottom:1px solid #edf0f4;font-size:14px}th{color:#64748b;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+.pill{display:inline-block;border-radius:30px;padding:4px 9px;background:#edf7f0;color:#17663b;font-size:12px;font-weight:750}.user{background:#eef2f7;color:#40516a}
+#error{color:#b42318;margin:16px 0}.hidden{display:none}.empty{text-align:center;padding:24px;color:#64748b}
+@media(max-width:520px){main{margin:18px auto}.card{padding:14px}.head h1{font-size:22px}}
+</style>
+</head>
+<body>
+<header class="top"><div class="brand">WIN CASH</div><div class="sub">Espace d'administration sécurisé</div></header>
+<main>
+  <div class="head"><div><h1>Tableau de bord</h1><div class="muted" id="welcome">Vérification de l'accès administrateur…</div></div><div><a class="link secondary" href="/">Espace membre</a> <button id="refresh">Actualiser</button></div></div>
+  <div id="error" role="alert"></div>
+  <section id="content" class="hidden">
+    <div class="cards">
+      <div class="card"><div class="muted">Membres inscrits</div><div class="metric" id="total">0</div></div>
+      <div class="card"><div class="muted">Administrateurs</div><div class="metric" id="admins">0</div></div>
+      <div class="card"><div class="muted">Comptes membres</div><div class="metric" id="members">0</div></div>
+    </div>
+    <section class="card">
+      <h2 style="margin:0">Liste des utilisateurs</h2><p class="muted">Données des comptes enregistrés sur WIN CASH. Les mots de passe ne sont jamais affichés.</p>
+      <div class="table-wrap"><table><thead><tr><th>ID</th><th>Nom complet</th><th>E-mail</th><th>Téléphone</th><th>Rôle</th><th>Inscription</th></tr></thead><tbody id="rows"></tbody></table></div>
+      <div id="empty" class="empty hidden">Aucun utilisateur trouvé.</div>
+    </section>
+  </section>
+</main>
+<script>
+const el=id=>document.getElementById(id);
+async function request(url){const r=await fetch(url,{credentials:"same-origin",headers:{"Accept":"application/json"}});const d=await r.json().catch(()=>({error:"Réponse invalide du serveur."}));if(!r.ok)throw new Error(d.error||"Accès refusé.");return d;}
+function showError(s){el("error").textContent=s;}
+async function load(){
+  showError("");el("content").classList.add("hidden");
+  try{
+    const me=await request("/api/auth/me");
+    if(me.user.role!=="admin")throw new Error("Ce compte n'a pas les droits administrateur.");
+    el("welcome").textContent="Connecté en tant qu'administrateur : "+me.user.firstName+" "+me.user.lastName;
+    const data=await request("/api/admin/users");const users=data.users||[];
+    el("total").textContent=users.length;
+    el("admins").textContent=users.filter(u=>u.role==="admin").length;
+    el("members").textContent=users.filter(u=>u.role==="user").length;
+    el("rows").replaceChildren();
+    users.forEach(u=>{
+      const tr=document.createElement("tr");
+      const vals=[u.id,u.firstName+" "+u.lastName,u.email,u.phone,u.role,u.createdAt?new Date(u.createdAt).toLocaleDateString("fr-FR"):"—"];
+      vals.forEach((v,i)=>{const td=document.createElement("td");if(i===4){const b=document.createElement("span");b.className="pill "+(v==="admin"?"":"user");b.textContent=v==="admin"?"Administrateur":"Membre";td.appendChild(b);}else td.textContent=String(v??"—");tr.appendChild(td);});
+      el("rows").appendChild(tr);
+    });
+    el("empty").classList.toggle("hidden",users.length!==0);
+    el("content").classList.remove("hidden");
+  }catch(e){showError(e.message+" Connecte-toi avec ton compte administrateur dans le même navigateur, puis recharge cette page.");}
+}
+el("refresh").addEventListener("click",load);load();
+</script>
+</body></html>
