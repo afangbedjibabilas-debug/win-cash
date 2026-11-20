@@ -60,7 +60,24 @@ async function load(){
     el("empty").classList.toggle("hidden",users.length!==0);
     el("content").classList.remove("hidden");
   }catch(e){showError(e.message+" Connecte-toi avec ton compte administrateur dans le même navigateur, puis recharge cette page.");}
-}
+}const searchInput=document.createElement("input");
+searchInput.type="search";
+searchInput.placeholder="Rechercher un membre : nom, e-mail ou téléphone";
+searchInput.style.cssText="width:100%;padding:12px;margin:12px 0;border:1px solid #cbd5e1;border-radius:10px;font-size:16px";
+const tableWrap=document.querySelector(".table-wrap");
+tableWrap.parentNode.insertBefore(searchInput,tableWrap);
+searchInput.addEventListener("input",()=>{
+  const q=searchInput.value.trim().toLowerCase();
+  const rows=[...el("rows").querySelectorAll("tr")];
+  let shown=0;
+  rows.forEach(row=>{
+    const match=row.textContent.toLowerCase().includes(q);
+    row.hidden=!match;
+    if(match)shown++;
+  });
+  el("empty").textContent="Aucun membre ne correspond à cette recherche.";
+  el("empty").classList.toggle("hidden",shown!==0);
+});
 el("refresh").addEventListener("click",load);load();
 </script>
 </body></html>
