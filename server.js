@@ -103,7 +103,54 @@ async function initializeDatabase() {
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
     CREATE INDEX IF NOT EXISTS users_created_at_idx ON users(created_at DESC);
-  `);
+ ALTER TABLE users
+ADD COLUMN IF NOT EXISTS referral_code VARCHAR(30);
+
+ALTER TABLE users
+ADD COLUMN IF NOT EXISTS referred_by BIGINT REFERENCES users(id);
+
+ALTER TABLE users
+ADD COLUMN IF NOT EXISTS activation_status VARCHAR(20) NOT NULL DEFAULT 'active';
+
+ALTER TABLE users
+ADD COLUMN IF NOT EXISTS activated_at TIMESTAMPTZ;
+
+UPDATE users
+SET referral_code = 'WC' || LPAD(id::TEXT, 8, '0')
+WHERE referral_code IS NULL;
+
+CREATE UNIQUE INDEX IF NOT EXISTS users_referral_code_idx
+ON users(referral_code);
+
+ALTER TABLE users
+ALTER COLUMN activation_status SET DEFAULT 'pending';
+
+CREATE TABLE IF NOT EXISTS activation_payments (
+  id BIGSERIAL PRIMARY KEY,
+  user_id BIGINT NOT NULL UNIQUE REFERENCES users(id),
+  amount BIGINT NOT NULL CHECK (amount = 3000),
+  provider_reference VARCHAR(150) UNIQUE,
+  status VARCHAR(20) NOT NULL DEFAULT 'pending',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  confirmed_at TIMESTAMPTZ
+);
+
+CREATE TABLE IF NOT EXISTS commissions (
+  id BIGSERIAL PRIMARY KEY,
+  referrer_id BIGINT NOT NULL REFERENCES users(id),
+  referred_user_id BIGINT NOT NULL UNIQUE REFERENCES users(id),
+  amount BIGINT NOT NULL DEFAULT 1000 CHECK (amount = 1000),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS withdrawals (
+  id BIGSERIAL PRIMARY KEY,
+  user_id BIGINT NOT NULL REFERENCES users(id),
+  amount BIGINT NOT NULL CHECK (amount >= 5000),
+  mobile_money_number VARCHAR(30) NOT NULL,
+  status VARCHAR(20) NOT NULL DEFAULT 'pending',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+); `);
 }
 
 app.get("/api/health", async (_req, res) => {
