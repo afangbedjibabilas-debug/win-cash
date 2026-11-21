@@ -5,8 +5,9 @@
   "description": "WIN CASH account platform foundation",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
-  },
+  "start": "node server.js",
+  "migrate": "node scripts/run-migrations.js"
+},
   "engines": { "node": ">=20" },
   "dependencies": {
     "connect-pg-simple": "^10.0.0",
