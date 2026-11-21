@@ -10,7 +10,7 @@ ALTER TABLE users
 
 -- Les anciens membres sont conservés comme membres activés.
 UPDATE users
-SET activated_at = COALESCE(activated_at, created_at),
+SET is_active = TRUE,  activated_at = COALESCE(activated_at, created_at),
     referral_code = COALESCE(
       referral_code,
       'WC' || UPPER(SUBSTRING(
