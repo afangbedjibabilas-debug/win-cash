@@ -33,7 +33,8 @@ footer{text-align:center;color:#64748b;font-size:12px;margin:20px 0}
     <label for="lastName">Nom</label><input id="lastName" autocomplete="family-name" required maxlength="80">
     <label for="regEmail">Adresse e-mail</label><input id="regEmail" type="email" autocomplete="email" required>
     <label for="phone">Téléphone</label><input id="phone" type="tel" autocomplete="tel" required maxlength="30">
-    <label for="regPassword">Mot de passe (10 caractères minimum)</label><input id="regPassword" type="password" autocomplete="new-password" minlength="10" required>
+  <label for="referralCode">Code de parrainage (facultatif)</label>
+<input id="referralCode" maxlength="30" placeholder="Code de votre parrain">  <label for="regPassword">Mot de passe (10 caractères minimum)</label><input id="regPassword" type="password" autocomplete="new-password" minlength="10" required>
     <button type="submit">Créer mon compte</button>
   </form>
   <form id="loginForm">
@@ -82,7 +83,9 @@ $("registerForm").onsubmit=async e=>{
   try{
     const data=await api("/api/auth/register",{method:"POST",body:JSON.stringify({
       firstName:$("firstName").value,lastName:$("lastName").value,email:$("regEmail").value,
-      phone:$("phone").value,password:$("regPassword").value
+      phone:$("phone").value,
+referralCode:$("referralCode").value,
+password:$("regPassword").value
     })}); render(data.user);
   }catch(err){message(err.message);}
 };
