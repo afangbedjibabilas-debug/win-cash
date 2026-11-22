@@ -153,7 +153,7 @@ CREATE TABLE IF NOT EXISTS withdrawals (
 ); `);
 }
 
-app.get("/api/health", async (_req, res) => {
+app.get("/api/health", async (, res) => {
   try {
     await pool.query("SELECT 1");
     res.json({ ok: true, service: "WIN CASH", database: "connected", realMoneyEnabled: false });
@@ -168,8 +168,8 @@ app.post("/api/auth/register", authLimiter, async (req, res) => {
     const lastName = cleanText(req.body.lastName, 80);
     const email = cleanText(req.body.email, 254).toLowerCase();
     const phone = cleanText(req.body.phone, 30);
-    const password = typeof req.body.password === "string" ? req.body.password : "";
-
+const referralCode = cleanText(req.body.referralCode, 30).toUpperCase();
+const password = typeof req.body.password === "string" ? req.body.password : "";
     if (!firstName || !lastName || !validEmail(email) || !phone) {
       return res.status(400).json({ error: "Vérifie ton nom, prénom, e-mail et téléphone." });
     }
@@ -177,13 +177,13 @@ app.post("/api/auth/register", authLimiter, async (req, res) => {
       return res.status(400).json({ error: "Le mot de passe doit contenir au moins 10 caractères." });
     }
 
-    const salt = crypto.randomBytes(16).toString("hex");
+    const salt = crypto.randomBytes(16).toString("hex");const newReferralCode = "WC" + crypto.randomBytes(4).toString("hex").toUpperCase();
     const passwordHash = await hashPassword(password, salt);
     const result = await pool.query(
-      `INSERT INTO users (first_name,last_name,email,phone,password_hash,password_salt)
-       VALUES ($1,$2,$3,$4,$5,$6)
+      INSERT INTO users (first_name,last_name,email,phone,password_hash,password_salt,referral_code,referred_by)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,(SELECT id FROM users WHERE referral_code = $8))
        RETURNING id,first_name,last_name,email,phone,role,created_at`,
-      [firstName,lastName,email,phone,passwordHash,salt]
+      [firstName,lastName,email,phone,passwordHash,salt,newReferralCode,referralCode || null]
     );
     req.session.userId = result.rows[0].id;
     req.session.regenerate((err) => {
