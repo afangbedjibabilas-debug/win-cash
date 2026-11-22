@@ -254,7 +254,7 @@ app.get("/api/admin/users", requireAuth, async (req, res) => {
   );
   res.json({ users: result.rows.map(publicUser) });
 });
-
+installPayments(app, pool, requireAuth);
 app.use(express.static(path.join(__dirname, "public"), { extensions: ["html"] }));
 app.get("*", (_req, res) => res.sendFile(path.join(__dirname, "public", "index.html")));
 
