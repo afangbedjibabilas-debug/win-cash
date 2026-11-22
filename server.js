@@ -180,7 +180,7 @@ const password = typeof req.body.password === "string" ? req.body.password : "";
     const salt = crypto.randomBytes(16).toString("hex");const newReferralCode = "WC" + crypto.randomBytes(4).toString("hex").toUpperCase();
     const passwordHash = await hashPassword(password, salt);
     const result = await pool.query(
-      INSERT INTO users (first_name,last_name,email,phone,password_hash,password_salt,referral_code,referred_by)
+            `INSERT INTO users (first_name,last_name,email,phone,password_hash,password_salt,referral_code,referred_by)
        VALUES ($1,$2,$3,$4,$5,$6,$7,(SELECT id FROM users WHERE referral_code = $8))
        RETURNING id,first_name,last_name,email,phone,role,created_at`,
       [firstName,lastName,email,phone,passwordHash,salt,newReferralCode,referralCode || null]
