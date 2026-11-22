@@ -80,7 +80,10 @@ function publicUser(row) {
     email: row.email,
     phone: row.phone,
     role: row.role,
-    createdAt: row.created_at
+    createdAt: row.created_at,
+    referralCode: row.referral_code,
+    activationStatus: row.activation_status,
+    activatedAt: row.activated_at
   };
 }
 function requireAuth(req, res, next) {
