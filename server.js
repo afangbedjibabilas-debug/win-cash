@@ -153,7 +153,7 @@ CREATE TABLE IF NOT EXISTS withdrawals (
 ); `);
 }
 
-app.get("/api/health", async (, res) => {
+app.get("/api/health", async (req, res) => {
   try {
     await pool.query("SELECT 1");
     res.json({ ok: true, service: "WIN CASH", database: "connected", realMoneyEnabled: false });
