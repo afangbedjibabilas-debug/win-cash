@@ -6,7 +6,7 @@ const { Pool } = require("pg");
 const { rateLimit } = require("express-rate-limit");
 const path = require("path");
 const crypto = require("crypto");
-
+const installPayments = require("./payments");
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
 const isProduction = process.env.NODE_ENV === "production";
