@@ -260,7 +260,7 @@ module.exports = function installAdmin(app, pool, requireAuth) {
       res.status(500).json({
         error: "Historique indisponible : vérifie les tables de transactions."
          });
-    }
+    });
 
     app.get("/api/admin/history", requireAuth, requireAdmin, async (req, res) => {
       try {
