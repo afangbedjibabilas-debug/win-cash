@@ -254,14 +254,7 @@ app.post("/api/auth/logout", requireAuth, (req, res) => {
   });
 });
 
-app.get("/api/admin/users", requireAuth, async (req, res) => {
-  const me = await pool.query("SELECT role FROM users WHERE id=$1", [req.session.userId]);
-  if (me.rows[0]?.role !== "admin") return res.status(403).json({ error: "Accès administrateur requis." });
-  const result = await pool.query(
-    "SELECT id,first_name,last_name,email,phone,role,created_at FROM users ORDER BY created_at DESC LIMIT 500"
-  );
-  res.json({ users: result.rows.map(publicUser) });
-});
+
 installPayments(app, pool, requireAuth);
 installAdmin(app, pool, requireAuth);
 app.use(express.static(path.join(__dirname, "public"), { extensions: ["html"] }));
