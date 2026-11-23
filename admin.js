@@ -117,7 +117,7 @@ module.exports = function installAdmin(app, pool, requireAuth) {
       }
 
       await client.query(
-        "UPDATE users SET account_status=$1, updated_at=NOW() WHERE id=$2",
+        "UPDATE users SET activation_status=$1, updated_at=NOW() WHERE id=$2",
         [status, id]
       );
 
@@ -182,7 +182,7 @@ module.exports = function installAdmin(app, pool, requireAuth) {
       }
 
       await client.query(
-        "UPDATE users SET account_status='archived', updated_at=NOW() WHERE id=$1",
+        "UPDATE users SET activation_status='archived', updated_at=NOW() WHERE id=$1",
         [id]
       );
 
