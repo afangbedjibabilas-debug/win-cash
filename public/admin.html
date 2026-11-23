@@ -299,7 +299,7 @@ async function load() {
       api("/api/admin/operations")
     ]);
 
-    const stats = overview.stats || overview;
+    const stats = overview.overview || overview.stats || overview;
     el("total").textContent = stats.total ?? "—";
     el("admins").textContent = stats.admins ?? "—";
     el("membersCount").textContent = stats.members ?? "—";
