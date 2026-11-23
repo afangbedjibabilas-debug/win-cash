@@ -3,14 +3,14 @@ module.exports = function installAdmin(app, pool, requireAuth) {
   async function requireAdmin(req, res, next) {
     try {
       const result = await pool.query(
-        "SELECT role, account_status FROM users WHERE id=$1",
+        "SELECT role, activation_status FROM users WHERE id=$1",
         [req.session.userId]
       );
 
       if (
         !result.rows[0] ||
         result.rows[0].role !== "admin" ||
-        result.rows[0].account_status !== "active"
+        result.rows[0].activation_status !== "active"
       ) {
         return res.status(403).json({ error: "Accès administrateur requis." });
       }
@@ -29,9 +29,9 @@ module.exports = function installAdmin(app, pool, requireAuth) {
           COUNT(*)::int AS total,
           COUNT(*) FILTER (WHERE role='admin')::int AS admins,
           COUNT(*) FILTER (WHERE role='user')::int AS members,
-          COUNT(*) FILTER (WHERE account_status='active')::int AS active,
-          COUNT(*) FILTER (WHERE account_status='suspended')::int AS suspended,
-          COUNT(*) FILTER (WHERE account_status='banned')::int AS banned
+          COUNT(*) FILTER (WHERE activation_status='active')::int AS active,
+          COUNT(*) FILTER (WHERE activation_status='suspended')::int AS suspended,
+          COUNT(*) FILTER (WHERE activation_status='banned')::int AS banned
         FROM users
       `);
 
@@ -52,7 +52,7 @@ module.exports = function installAdmin(app, pool, requireAuth) {
         SELECT
           u.id, u.first_name, u.last_name, u.email, u.phone,
           u.role, u.created_at, u.referral_code,
-          COALESCE(u.account_status, 'active') AS account_status,
+          COALESCE(u.activation_status, 'active') AS account_status,
           COUNT(child.id)::int AS referral_count
         FROM users u
         LEFT JOIN users child ON child.referred_by = u.id
