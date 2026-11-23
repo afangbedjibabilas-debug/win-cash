@@ -1,83 +1,347 @@
-<!doctype html>
+
+<!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#101d32">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>WIN CASH — Administration</title>
 <style>
-:root{font-family:Inter,system-ui,Arial,sans-serif;color:#172033;background:#f3f5f8}
-*{box-sizing:border-box}body{margin:0}.top{background:#101d32;color:#fff;padding:22px 18px}.brand{font-size:24px;font-weight:850;letter-spacing:1px}.sub{opacity:.8;margin-top:5px}
-main{max-width:1050px;margin:26px auto;padding:0 16px}.head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.head h1{margin:0 0 5px;font-size:25px}
-button,.link{border:0;border-radius:9px;padding:11px 15px;background:#dcae49;color:#101d32;font-weight:750;font-size:14px;cursor:pointer;text-decoration:none}
-.secondary{background:#e8edf4;color:#26364d}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin:22px 0}
-.card{background:#fff;border:1px solid #e2e8f0;border-radius:15px;padding:18px;box-shadow:0 7px 24px #14243a0a}
-.metric{font-size:30px;font-weight:800;margin-top:8px}.muted{color:#64748b;font-size:13px}
-.table-wrap{overflow:auto;margin-top:15px}table{width:100%;border-collapse:collapse;min-width:650px}th,td{text-align:left;padding:13px 10px;border-bottom:1px solid #edf0f4;font-size:14px}th{color:#64748b;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
-.pill{display:inline-block;border-radius:30px;padding:4px 9px;background:#edf7f0;color:#17663b;font-size:12px;font-weight:750}.user{background:#eef2f7;color:#40516a}
-#error{color:#b42318;margin:16px 0}.hidden{display:none}.empty{text-align:center;padding:24px;color:#64748b}
-@media(max-width:520px){main{margin:18px auto}.card{padding:14px}.head h1{font-size:22px}}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f3f5f9;color:#182230}
+header{background:#101c35;color:white;padding:20px}
+header h1{margin:0 0 8px;font-size:23px}
+header p{margin:0;color:#cbd5e1;font-size:13px}
+main{max-width:1200px;margin:auto;padding:16px}
+nav{display:flex;gap:8px;overflow-x:auto;padding:8px 0 14px}
+nav button{white-space:nowrap;border:0;border-radius:8px;padding:11px 14px;background:#e2e8f0;color:#182230;font-weight:bold}
+nav button.active{background:#174ea6;color:white}
+.panel{background:white;border-radius:12px;padding:16px;margin-bottom:15px;box-shadow:0 2px 8px #0000000c}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:12px}
+.stat{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:15px}
+.stat span{display:block;color:#64748b;font-size:13px;margin-bottom:8px}
+.stat strong{font-size:24px}
+h2{font-size:18px;margin:0 0 14px}
+input{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:8px;margin:8px 0 14px;font-size:15px}
+.table-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:750px;font-size:13px}
+th,td{padding:12px 10px;border-bottom:1px solid #e2e8f0;text-align:left;vertical-align:middle}
+th{background:#f8fafc}
+button.action{border:0;border-radius:6px;padding:8px 10px;margin:2px;font-weight:bold;font-size:12px}
+.green{background:#dcfce7;color:#166534}
+.orange{background:#ffedd5;color:#9a3412}
+.red{background:#fee2e2;color:#991b1b}
+.gray{background:#e2e8f0;color:#334155}
+.status{font-weight:bold}
+.hidden{display:none!important}
+#error{color:#b91c1c;background:#fee2e2;padding:12px;border-radius:8px;margin-bottom:12px}
+#notice{color:#166534;background:#dcfce7;padding:12px;border-radius:8px;margin-bottom:12px}
+.muted{color:#64748b;font-size:13px}
+.refresh{background:#174ea6;color:white;border:0;border-radius:8px;padding:10px 14px;font-weight:bold}
 </style>
 </head>
 <body>
-<header class="top"><div class="brand">WIN CASH</div><div class="sub">Espace d'administration sécurisé</div></header>
+<header>
+<h1>WIN CASH — Administration</h1>
+<p id="welcome">Espace sécurisé de gestion</p>
+</header>
+
 <main>
-  <div class="head"><div><h1>Tableau de bord</h1><div class="muted" id="welcome">Vérification de l'accès administrateur…</div></div><div><a class="link secondary" href="/">Espace membre</a> <button id="refresh">Actualiser</button></div></div>
-  <div id="error" role="alert"></div>
-  <section id="content" class="hidden">
-    <div class="cards">
-      <div class="card"><div class="muted">Membres inscrits</div><div class="metric" id="total">0</div></div>
-      <div class="card"><div class="muted">Administrateurs</div><div class="metric" id="admins">0</div></div>
-      <div class="card"><div class="muted">Comptes membres</div><div class="metric" id="members">0</div></div>
-    </div>
-    <section class="card">
-      <h2 style="margin:0">Liste des utilisateurs</h2><p class="muted">Données des comptes enregistrés sur WIN CASH. Les mots de passe ne sont jamais affichés.</p>
-      <div class="table-wrap"><table><thead><tr><th>ID</th><th>Nom complet</th><th>E-mail</th><th>Téléphone</th><th>Rôle</th><th>Inscription</th></tr></thead><tbody id="rows"></tbody></table></div>
-      <div id="empty" class="empty hidden">Aucun utilisateur trouvé.</div>
-    </section>
-  </section>
+<div id="error" class="hidden"></div>
+<div id="notice" class="hidden"></div>
+
+<nav>
+<button class="active" data-tab="overview">Vue générale</button>
+<button data-tab="members">Membres</button>
+<button data-tab="deposits">Dépôts</button>
+<button data-tab="withdrawals">Retraits</button>
+<button data-tab="referrals">Parrainages</button>
+<button data-tab="history">Historique</button>
+</nav>
+
+<section id="overview" class="tab">
+<div class="panel">
+<h2>Statistiques générales</h2>
+<div class="stats">
+<div class="stat"><span>Total des comptes</span><strong id="total">—</strong></div>
+<div class="stat"><span>Administrateurs</span><strong id="admins">—</strong></div>
+<div class="stat"><span>Membres</span><strong id="membersCount">—</strong></div>
+<div class="stat"><span>Comptes actifs</span><strong id="active">—</strong></div>
+<div class="stat"><span>Comptes suspendus</span><strong id="suspended">—</strong></div>
+<div class="stat"><span>Comptes bannis</span><strong id="banned">—</strong></div>
+</div>
+</div>
+</section>
+
+<section id="members" class="tab hidden">
+<div class="panel">
+<h2>Gestion des membres</h2>
+<input id="memberSearch" placeholder="Rechercher par nom, e-mail ou téléphone...">
+<div class="table-wrap">
+<table>
+<thead><tr>
+<th>ID</th><th>Nom complet</th><th>E-mail</th><th>Téléphone</th>
+<th>Statut</th><th>Parrainages</th><th>Inscription</th><th>Actions</th>
+</tr></thead>
+<tbody id="memberRows"></tbody>
+</table>
+</div>
+<p id="memberEmpty" class="muted hidden">Aucun membre trouvé.</p>
+</div>
+</section>
+
+<section id="deposits" class="tab hidden">
+<div class="panel">
+<h2>Historique des dépôts</h2>
+<p class="muted">Consultation uniquement : aucun paiement ne sera déclenché depuis cette page.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>ID</th><th>Membre</th><th>Montant</th><th>Devise</th><th>Statut</th><th>Date</th></tr></thead>
+<tbody id="depositRows"></tbody>
+</table></div>
+<p id="depositEmpty" class="muted hidden">Aucun dépôt enregistré.</p>
+</div>
+</section>
+
+<section id="withdrawals" class="tab hidden">
+<div class="panel">
+<h2>Historique des retraits</h2>
+<p class="muted">Consultation uniquement : aucune demande de retrait ne sera validée ici.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>ID</th><th>Membre</th><th>Montant</th><th>Devise</th><th>Statut</th><th>Date</th></tr></thead>
+<tbody id="withdrawalRows"></tbody>
+</table></div>
+<p id="withdrawalEmpty" class="muted hidden">Aucun retrait enregistré.</p>
+</div>
+</section>
+
+<section id="referrals" class="tab hidden">
+<div class="panel">
+<h2>Suivi des parrainages</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>ID</th><th>Nom du membre</th><th>Code de parrainage</th><th>Nombre de filleuls</th></tr></thead>
+<tbody id="referralRows"></tbody>
+</table></div>
+<p id="referralEmpty" class="muted hidden">Aucun parrainage enregistré.</p>
+</div>
+</section>
+
+<section id="history" class="tab hidden">
+<div class="panel">
+<h2>Historique des actions administratives</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>ID</th><th>Administrateur</th><th>Action</th><th>Membre concerné</th><th>Date</th></tr></thead>
+<tbody id="historyRows"></tbody>
+</table></div>
+<p id="historyEmpty" class="muted">L'historique sera affiché lorsque son accès sera activé sur le serveur.</p>
+</div>
+</section>
+
+<div class="panel">
+<button class="refresh" id="refresh">Actualiser les données</button>
+</div>
 </main>
+
 <script>
-const el=id=>document.getElementById(id);
-async function request(url){const r=await fetch(url,{credentials:"same-origin",headers:{"Accept":"application/json"}});const d=await r.json().catch(()=>({error:"Réponse invalide du serveur."}));if(!r.ok)throw new Error(d.error||"Accès refusé.");return d;}
-function showError(s){el("error").textContent=s;}
-async function load(){
-  showError("");el("content").classList.add("hidden");
-  try{
-    const me=await request("/api/auth/me");
-    if(me.user.role!=="admin")throw new Error("Ce compte n'a pas les droits administrateur.");
-    el("welcome").textContent="Connecté en tant qu'administrateur : "+me.user.firstName+" "+me.user.lastName;
-    const data=await request("/api/admin/users");const users=data.users||[];
-    el("total").textContent=users.length;
-    el("admins").textContent=users.filter(u=>u.role==="admin").length;
-    el("members").textContent=users.filter(u=>u.role==="user").length;
-    el("rows").replaceChildren();
-    users.forEach(u=>{
-      const tr=document.createElement("tr");
-      const vals=[u.id,u.firstName+" "+u.lastName,u.email,u.phone,u.role,u.createdAt?new Date(u.createdAt).toLocaleDateString("fr-FR"):"—"];
-      vals.forEach((v,i)=>{const td=document.createElement("td");if(i===4){const b=document.createElement("span");b.className="pill "+(v==="admin"?"":"user");b.textContent=v==="admin"?"Administrateur":"Membre";td.appendChild(b);}else td.textContent=String(v??"—");tr.appendChild(td);});
-      el("rows").appendChild(tr);
-    });
-    el("empty").classList.toggle("hidden",users.length!==0);
-    el("content").classList.remove("hidden");
-  }catch(e){showError(e.message+" Connecte-toi avec ton compte administrateur dans le même navigateur, puis recharge cette page.");}
-}const searchInput=document.createElement("input");
-searchInput.type="search";
-searchInput.placeholder="Rechercher un membre : nom, e-mail ou téléphone";
-searchInput.style.cssText="width:100%;padding:12px;margin:12px 0;border:1px solid #cbd5e1;border-radius:10px;font-size:16px";
-const tableWrap=document.querySelector(".table-wrap");
-tableWrap.parentNode.insertBefore(searchInput,tableWrap);
-searchInput.addEventListener("input",()=>{
-  const q=searchInput.value.trim().toLowerCase();
-  const rows=[...el("rows").querySelectorAll("tr")];
-  let shown=0;
-  rows.forEach(row=>{
-    const match=row.textContent.toLowerCase().includes(q);
-    row.hidden=!match;
-    if(match)shown++;
+const el = id => document.getElementById(id);
+let allUsers = [];
+let allOperations = [];
+
+async function api(url, options = {}) {
+  const response = await fetch(url, {
+    credentials: "same-origin",
+    ...options,
+    headers: {
+      "Accept": "application/json",
+      ...(options.body ? {"Content-Type":"application/json"} : {}),
+      ...(options.headers || {})
+    }
   });
-  el("empty").textContent="Aucun membre ne correspond à cette recherche.";
-  el("empty").classList.toggle("hidden",shown!==0);
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || "Une erreur est survenue.");
+  return data;
+}
+
+function error(message) {
+  el("error").textContent = message;
+  el("error").classList.remove("hidden");
+}
+function notice(message) {
+  el("notice").textContent = message;
+  el("notice").classList.remove("hidden");
+  setTimeout(() => el("notice").classList.add("hidden"), 3500);
+}
+function date(value) {
+  return value ? new Date(value).toLocaleString("fr-FR") : "—";
+}
+function cell(row, value) {
+  const td = document.createElement("td");
+  td.textContent = value ?? "—";
+  row.appendChild(td);
+  return td;
+}
+function fullName(user) {
+  return [user.first_name, user.last_name].filter(Boolean).join(" ") || "—";
+}
+function statusLabel(status) {
+  const labels = {
+    active:"Actif", suspended:"Suspendu",
+    banned:"Banni", archived:"Archivé"
+  };
+  return labels[status] || status || "—";
+}
+
+function renderMembers(users) {
+  const tbody = el("memberRows");
+  tbody.replaceChildren();
+  const query = el("memberSearch").value.toLowerCase().trim();
+  const filtered = users.filter(u =>
+    [u.first_name,u.last_name,u.email,u.phone]
+      .some(v => String(v || "").toLowerCase().includes(query))
+  );
+
+  filtered.forEach(u => {
+    const tr = document.createElement("tr");
+    cell(tr,u.id);
+    cell(tr,fullName(u));
+    cell(tr,u.email);
+    cell(tr,u.phone);
+    cell(tr,statusLabel(u.account_status));
+    cell(tr,u.referral_count);
+    cell(tr,date(u.created_at));
+
+    const actions = document.createElement("td");
+    if (u.role === "user") {
+      if (u.account_status !== "archived") {
+        if (u.account_status === "active") {
+          actions.appendChild(actionButton("Suspendre","orange",()=>changeStatus(u.id,"suspended")));
+        } else {
+          actions.appendChild(actionButton("Réactiver","green",()=>changeStatus(u.id,"active")));
+        }
+        if (u.account_status !== "banned") {
+          actions.appendChild(actionButton("Bannir","red",()=>changeStatus(u.id,"banned")));
+        }
+        actions.appendChild(actionButton("Archiver","gray",()=>archiveMember(u.id)));
+      }
+    } else {
+      actions.textContent = "Compte administrateur";
+    }
+    tr.appendChild(actions);
+    tbody.appendChild(tr);
+  });
+  el("memberEmpty").classList.toggle("hidden",filtered.length > 0);
+}
+
+function actionButton(label, style, callback) {
+  const button = document.createElement("button");
+  button.className = "action " + style;
+  button.textContent = label;
+  button.addEventListener("click",callback);
+  return button;
+}
+
+async function changeStatus(id,status) {
+  const label = statusLabel(status);
+  if (!confirm("Confirmer le changement de statut : " + label + " ?")) return;
+  try {
+    await api("/api/admin/users/" + id + "/status", {
+      method:"PATCH",
+      body:JSON.stringify({status})
+    });
+    notice("Statut du membre mis à jour.");
+    await load();
+  } catch(e) { error(e.message); }
+}
+
+async function archiveMember(id) {
+  if (!confirm("Archiver ce membre ? Son compte ne sera pas supprimé définitivement.")) return;
+  try {
+    await api("/api/admin/users/" + id,{method:"DELETE"});
+    notice("Membre archivé.");
+    await load();
+  } catch(e) { error(e.message); }
+}
+
+function renderOperations(operations) {
+  const deposits = operations.filter(o => String(o.type).toLowerCase().includes("activation"));
+  const withdrawals = operations.filter(o => String(o.type).toLowerCase().includes("withdraw"));
+  renderOperationTable("depositRows","depositEmpty",deposits);
+  renderOperationTable("withdrawalRows","withdrawalEmpty",withdrawals);
+}
+function renderOperationTable(bodyId,emptyId,items) {
+  const tbody = el(bodyId);
+  tbody.replaceChildren();
+  items.forEach(o => {
+    const tr = document.createElement("tr");
+    cell(tr,o.id);
+    cell(tr,[o.first_name,o.last_name].filter(Boolean).join(" ") || ("Membre #" + o.user_id));
+    cell(tr,o.amount);
+    cell(tr,o.currency || "XOF");
+    cell(tr,o.status);
+    cell(tr,date(o.created_at));
+    tbody.appendChild(tr);
+  });
+  el(emptyId).classList.toggle("hidden",items.length > 0);
+}
+
+async function load() {
+  el("error").classList.add("hidden");
+  try {
+    const me = await api("/api/auth/me");
+    if (!me.user || me.user.role !== "admin") {
+      throw new Error("Accès réservé aux administrateurs.");
+    }
+    el("welcome").textContent = "Connecté en tant qu'administrateur : " +
+      [me.user.firstName,me.user.lastName].filter(Boolean).join(" ");
+
+    const [overview,users,referrals,operations] = await Promise.all([
+      api("/api/admin/overview"),
+      api("/api/admin/users"),
+      api("/api/admin/referrals"),
+      api("/api/admin/operations")
+    ]);
+
+    const stats = overview.stats || overview;
+    el("total").textContent = stats.total ?? "—";
+    el("admins").textContent = stats.admins ?? "—";
+    el("membersCount").textContent = stats.members ?? "—";
+    el("active").textContent = stats.active ?? "—";
+    el("suspended").textContent = stats.suspended ?? "—";
+    el("banned").textContent = stats.banned ?? "—";
+
+    allUsers = users.users || [];
+    renderMembers(allUsers);
+
+    const referralRows = el("referralRows");
+    referralRows.replaceChildren();
+    const referralItems = referrals.referrals || [];
+    referralItems.forEach(u => {
+      const tr = document.createElement("tr");
+      cell(tr,u.id);
+      cell(tr,[u.first_name,u.last_name].filter(Boolean).join(" ") || "—");
+      cell(tr,u.referral_code);
+      cell(tr,u.referral_count);
+      referralRows.appendChild(tr);
+    });
+    el("referralEmpty").classList.toggle("hidden",referralItems.length > 0);
+
+    allOperations = operations.operations || [];
+    renderOperations(allOperations);
+  } catch(e) {
+    error(e.message + " Vérifie que tu es connecté avec ton compte administrateur.");
+  }
+}
+
+document.querySelectorAll("nav button").forEach(button => {
+  button.addEventListener("click",() => {
+    document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
+    button.classList.add("active");
+    document.querySelectorAll(".tab").forEach(tab=>tab.classList.add("hidden"));
+    el(button.dataset.tab).classList.remove("hidden");
+  });
 });
-el("refresh").addEventListener("click",load);load();
+
+el("memberSearch").addEventListener("input",()=>renderMembers(allUsers));
+el("refresh").addEventListener("click",load);
+load();
 </script>
-</body></html>
+</body>
+</html>
