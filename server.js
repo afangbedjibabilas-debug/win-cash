@@ -106,7 +106,14 @@ async function initializeDatabase() {
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
-    CREATE INDEX IF NOT EXISTS users_created_at_idx ON users(created_at DESC);
+    CREATE INDEX IF NOT EXISTS users_created_at_idx ON users(created_at DESC);    CREATE TABLE IF NOT EXISTS admin_audit_logs (
+      id BIGSERIAL PRIMARY KEY,
+      admin_user_id BIGINT NOT NULL REFERENCES users(id),
+      target_user_id BIGINT REFERENCES users(id),
+      action VARCHAR(80) NOT NULL,
+      details JSONB NOT NULL DEFAULT '{}'::jsonb,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
  ALTER TABLE users
 ADD COLUMN IF NOT EXISTS referral_code VARCHAR(30);
 
