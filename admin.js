@@ -259,8 +259,37 @@ module.exports = function installAdmin(app, pool, requireAuth) {
       console.error("Admin operations error:", err.message);
       res.status(500).json({
         error: "Historique indisponible : vérifie les tables de transactions."
-      });
+         });
     }
-  });
+
+    app.get("/api/admin/history", requireAuth, requireAdmin, async (req, res) => {
+      try {
+        const result = await pool.query(`
+          SELECT
+            log.id,
+            log.action,
+            log.details,
+            log.created_at,
+            log.admin_user_id,
+            admin.first_name AS admin_first_name,
+            admin.last_name AS admin_last_name,
+            log.target_user_id,
+            target.first_name AS target_first_name,
+            target.last_name AS target_last_name
+          FROM admin_audit_logs log
+          LEFT JOIN users admin ON admin.id = log.admin_user_id
+          LEFT JOIN users target ON target.id = log.target_user_id
+          ORDER BY log.created_at DESC
+          LIMIT 300
+        `);
+
+        res.json({ history: result.rows });
+      } catch (err) {
+        console.error("Admin history error:", err.message);
+        res.status(500).json({
+          error: "Impossible de charger l'historique administratif."
+        });
+      }
+    });
+  
 };
-          
