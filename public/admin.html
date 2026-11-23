@@ -284,22 +284,29 @@ function renderOperationTable(bodyId,emptyId,items) {
 
 async function load() {
   el("error").classList.add("hidden");
+
   try {
     const me = await api("/api/auth/me");
+
     if (!me.user || me.user.role !== "admin") {
       throw new Error("Accès réservé aux administrateurs.");
     }
-    el("welcome").textContent = "Connecté en tant qu'administrateur : " +
-      [me.user.firstName,me.user.lastName].filter(Boolean).join(" ");
 
-    const [overview,users,referrals,operations] = await Promise.all([
-      api("/api/admin/overview"),
-      api("/api/admin/users"),
-      api("/api/admin/referrals"),
-      api("/api/admin/operations")
-    ]);
+    el("welcome").textContent =
+      "Connecté en tant qu'administrateur : " +
+      [me.user.firstName, me.user.lastName].filter(Boolean).join(" ");
+
+    const [overview, users, referrals, operations, history] =
+      await Promise.all([
+        api("/api/admin/overview"),
+        api("/api/admin/users"),
+        api("/api/admin/referrals"),
+        api("/api/admin/operations"),
+        api("/api/admin/history")
+      ]);
 
     const stats = overview.overview || overview.stats || overview;
+
     el("total").textContent = stats.total ?? "—";
     el("admins").textContent = stats.admins ?? "—";
     el("membersCount").textContent = stats.members ?? "—";
@@ -312,19 +319,40 @@ async function load() {
 
     const referralRows = el("referralRows");
     referralRows.replaceChildren();
+
     const referralItems = referrals.referrals || [];
+
     referralItems.forEach(u => {
       const tr = document.createElement("tr");
-      cell(tr,u.id);
-      cell(tr,[u.first_name,u.last_name].filter(Boolean).join(" ") || "—");
-      cell(tr,u.referral_code);
-      cell(tr,u.referral_count);
+      cell(tr, u.id);
+      cell(tr, [u.first_name, u.last_name].filter(Boolean).join(" ") || "—");
+      cell(tr, u.referral_code);
+      cell(tr, u.referral_count);
       referralRows.appendChild(tr);
     });
-    el("referralEmpty").classList.toggle("hidden",referralItems.length > 0);
+
+    el("referralEmpty").classList.toggle("hidden", referralItems.length > 0);
 
     allOperations = operations.operations || [];
     renderOperations(allOperations);
+
+    const historyRows = el("historyRows");
+    historyRows.replaceChildren();
+
+    const historyItems = history.history || [];
+
+    historyItems.forEach(item => {
+      const tr = document.createElement("tr");
+      cell(tr, item.id);
+      cell(tr, [item.admin_first_name, item.admin_last_name].filter(Boolean).join(" ") || "—");
+      cell(tr, item.action);
+      cell(tr, [item.target_first_name, item.target_last_name].filter(Boolean).join(" ") || "—");
+      cell(tr, date(item.created_at));
+      historyRows.appendChild(tr);
+    });
+
+    el("historyEmpty").classList.toggle("hidden", historyItems.length > 0);
+
   } catch(e) {
     error(e.message + " Vérifie que tu es connecté avec ton compte administrateur.");
   }
