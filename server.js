@@ -9,32 +9,15 @@ const path = require("path");
 const crypto = require("crypto");
 const multer = require("multer");
 
-const privateUpload = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: 5 * 1024 * 1024, files: 1 },
-  fileFilter: (req, file, cb) => {
-    const allowedTypes = [
-      "image/jpeg",
-      "image/png",
-      "image/webp",
-      "application/pdf"
-    ];
-    if (!allowedTypes.includes(file.mimetype)) {
-      return cb(new Error("Format de fichier non accepté."));
-    }
-    cb(null, true);
-  }
-});
-
 const installPayments = require("./payments");
 const installAdmin = require("./admin");
-const app = express();
 
+const app = express();
 const PORT = Number(process.env.PORT || 3000);
 const isProduction = process.env.NODE_ENV === "production";
 
 if (!process.env.DATABASE_URL || !process.env.SESSION_SECRET) {
-  console.error("Missing DATABASE_URL or SESSION_SECRET environment variable.");
+  console.error("Missing DATABASE_URL or SESSION_SECRET.");
   process.exit(1);
 }
 
@@ -85,6 +68,28 @@ const authLimiter = rateLimit({
   }
 });
 
+const privateUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 5 * 1024 * 1024,
+    files: 1
+  },
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+      "application/pdf"
+    ];
+
+    if (!allowedTypes.includes(file.mimetype)) {
+      return cb(new Error("Format de fichier non accepté."));
+    }
+
+    cb(null, true);
+  }
+});
+
 function cleanText(value, max = 120) {
   return typeof value === "string"
     ? value.trim().slice(0, max)
@@ -132,7 +137,9 @@ function publicUser(row) {
 
 function requireAuth(req, res, next) {
   if (!req.session.userId) {
-    return res.status(401).json({ error: "Connexion requise." });
+    return res.status(401).json({
+      error: "Connexion requise."
+    });
   }
   next();
 }
@@ -149,6 +156,7 @@ function getDocumentEncryptionKey() {
 
 function encryptDocument(fileBuffer) {
   const iv = crypto.randomBytes(12);
+
   const cipher = crypto.createCipheriv(
     "aes-256-gcm",
     getDocumentEncryptionKey(),
@@ -167,152 +175,9 @@ function encryptDocument(fileBuffer) {
   };
 }
 
-/* DOCUMENTS : ENVOI CHIFFRÉ */
-
-app.post(
-  "/api/member/documents",
-  requireAuth,
-  privateUpload.single("document"),
-  async (req, res) => {
-    try {
-      const allowedDocumentTypes = [
-        "national_id",
-        "passport",
-        "drivers_license",
-        "voter_card",
-        "biometric_card",
-        "student_card",
-        "school_card"
-      ];
-
-      const documentType = cleanText(req.body.documentType, 40);
-
-      if (!allowedDocumentTypes.includes(documentType)) {
-        return res.status(400).json({
-          error: "Type de document non accepté."
-        });
-      }
-
-      if (!req.file) {
-        return res.status(400).json({
-          error: "Choisis un document à envoyer."
-        });
-      }
-
-      const { encryptedData, iv, authTag } =
-        encryptDocument(req.file.buffer);
-
-      await pool.query(
-        `INSERT INTO member_documents
-         (user_id, document_type, original_name, mime_type,
-          encrypted_data, encryption_iv, auth_tag)
-         VALUES ($1,$2,$3,$4,$5,$6,$7)`,
-        [
-          req.session.userId,
-          documentType,
-          cleanText(req.file.originalname, 255),
-          req.file.mimetype,
-          encryptedData,
-          iv,
-          authTag
-        ]
-      );
-
-      res.status(201).json({
-        ok: true,
-        message: "Document envoyé de manière chiffrée."
-      });
-    } catch (err) {
-      console.error("Document upload error:", err.message);
-      res.status(500).json({
-        error: "Impossible d'envoyer le document."
-      });
-    }
-  }
-);
-
-/* DOCUMENTS : CONSULTATION DES STATUTS */
-
-app.get("/api/member/documents", requireAuth, async (req, res) => {
-  try {
-    const result = await pool.query(
-      `SELECT
-         id,
-         document_type,
-         original_name,
-         mime_type,
-         status,
-         submitted_at,
-         reviewed_at
-       FROM member_documents
-       WHERE user_id = $1
-       ORDER BY submitted_at DESC`,
-      [req.session.userId]
-    );
-
-    res.json({ documents: result.rows });
-  } catch (err) {
-    console.error("Member documents list error:", err.message);
-    res.status(500).json({
-      error: "Impossible de charger tes documents."
-    });
-  }
-});
-
-/* MODIFICATION DU PROFIL */
-
-app.put("/api/member/profile", requireAuth, async (req, res) => {
-  try {
-    const firstName = cleanText(req.body.firstName, 80);
-    const lastName = cleanText(req.body.lastName, 80);
-    const email = cleanText(req.body.email, 254).toLowerCase();
-    const phone = cleanText(req.body.phone, 30);
-
-    if (!firstName || !lastName || !validEmail(email) || !phone) {
-      return res.status(400).json({
-        error: "Vérifie ton prénom, ton nom, ton e-mail et ton téléphone."
-      });
-    }
-
-    const result = await pool.query(
-      `UPDATE users
-       SET first_name=$1,
-           last_name=$2,
-           email=$3,
-           phone=$4,
-           updated_at=NOW()
-       WHERE id=$5
-       RETURNING id, first_name, last_name, email, phone,
-                 role, created_at, referral_code,
-                 activation_status, activated_at`,
-      [firstName, lastName, email, phone, req.session.userId]
-    );
-
-    if (!result.rows[0]) {
-      return res.status(404).json({
-        error: "Compte introuvable."
-      });
-    }
-
-    res.json({
-      ok: true,
-      user: publicUser(result.rows[0])
-    });
-  } catch (err) {
-    if (err.code === "23505") {
-      return res.status(409).json({
-        error: "Cette adresse e-mail est déjà utilisée."
-      });
-    }
-
-    console.error("Profile update error:", err.message);
-    res.status(500).json({
-      error: "Impossible de modifier le profil."
-    });
-  }
-});
-
-/* INITIALISATION DE LA BASE DE DONNÉES */
+/* =========================================
+   INITIALISATION DE LA BASE DE DONNÉES
+========================================= */
 
 async function initializeDatabase() {
   await pool.query(`
@@ -409,18 +274,21 @@ async function initializeDatabase() {
   `);
 }
 
-/* SANTÉ DU SERVEUR */
+/* =========================================
+   SANTÉ DU SERVEUR
+========================================= */
 
 app.get("/api/health", async (req, res) => {
   try {
     await pool.query("SELECT 1");
+
     res.json({
       ok: true,
       service: "WIN CASH",
       database: "connected",
       realMoneyEnabled: false
     });
-  } catch {
+  } catch (err) {
     res.status(503).json({
       ok: false,
       service: "WIN CASH",
@@ -429,7 +297,9 @@ app.get("/api/health", async (req, res) => {
   }
 });
 
-/* INSCRIPTION */
+/* =========================================
+   INSCRIPTION
+========================================= */
 
 app.post("/api/auth/register", authLimiter, async (req, res) => {
   try {
@@ -437,7 +307,11 @@ app.post("/api/auth/register", authLimiter, async (req, res) => {
     const lastName = cleanText(req.body.lastName, 80);
     const email = cleanText(req.body.email, 254).toLowerCase();
     const phone = cleanText(req.body.phone, 30);
-    const referralCode = cleanText(req.body.referralCode, 30).toUpperCase();
+    const referralCode = cleanText(
+      req.body.referralCode,
+      30
+    ).toUpperCase();
+
     const password = typeof req.body.password === "string"
       ? req.body.password
       : "";
@@ -457,6 +331,7 @@ app.post("/api/auth/register", authLimiter, async (req, res) => {
     const salt = crypto.randomBytes(16).toString("hex");
     const newReferralCode =
       "WC" + crypto.randomBytes(4).toString("hex").toUpperCase();
+
     const passwordHash = await hashPassword(password, salt);
 
     const result = await pool.query(
@@ -488,6 +363,7 @@ app.post("/api/auth/register", authLimiter, async (req, res) => {
       }
 
       req.session.userId = result.rows[0].id;
+
       req.session.save(saveErr => {
         if (saveErr) {
           return res.status(500).json({
@@ -514,7 +390,9 @@ app.post("/api/auth/register", authLimiter, async (req, res) => {
   }
 });
 
-/* CONNEXION */
+/* =========================================
+   CONNEXION
+========================================= */
 
 app.post("/api/auth/login", authLimiter, async (req, res) => {
   try {
@@ -551,6 +429,7 @@ app.post("/api/auth/login", authLimiter, async (req, res) => {
       }
 
       req.session.userId = user.id;
+
       req.session.save(saveErr => {
         if (saveErr) {
           return res.status(500).json({
@@ -558,7 +437,9 @@ app.post("/api/auth/login", authLimiter, async (req, res) => {
           });
         }
 
-        res.json({ user: publicUser(user) });
+        res.json({
+          user: publicUser(user)
+        });
       });
     });
   } catch (err) {
@@ -569,24 +450,31 @@ app.post("/api/auth/login", authLimiter, async (req, res) => {
   }
 });
 
-/* UTILISATEUR CONNECTÉ */
+/* =========================================
+   UTILISATEUR CONNECTÉ
+========================================= */
 
 app.get("/api/auth/me", requireAuth, async (req, res) => {
   try {
     const result = await pool.query(
       `SELECT id,first_name,last_name,email,phone,role,created_at,
               referral_code,activation_status,activated_at
-       FROM users WHERE id=$1`,
+       FROM users
+       WHERE id=$1`,
       [req.session.userId]
     );
 
     if (!result.rows[0]) {
       return req.session.destroy(() => {
-        res.status(401).json({ error: "Session expirée." });
+        res.status(401).json({
+          error: "Session expirée."
+        });
       });
     }
 
-    res.json({ user: publicUser(result.rows[0]) });
+    res.json({
+      user: publicUser(result.rows[0])
+    });
   } catch (err) {
     console.error("Session user error:", err.message);
     res.status(500).json({
@@ -595,7 +483,158 @@ app.get("/api/auth/me", requireAuth, async (req, res) => {
   }
 });
 
-/* DÉCONNEXION */
+/* =========================================
+   MODIFICATION DU PROFIL
+========================================= */
+
+app.put("/api/member/profile", requireAuth, async (req, res) => {
+  try {
+    const firstName = cleanText(req.body.firstName, 80);
+    const lastName = cleanText(req.body.lastName, 80);
+    const email = cleanText(req.body.email, 254).toLowerCase();
+    const phone = cleanText(req.body.phone, 30);
+
+    if (!firstName || !lastName || !validEmail(email) || !phone) {
+      return res.status(400).json({
+        error: "Vérifie ton prénom, ton nom, ton e-mail et ton téléphone."
+      });
+    }
+
+    const result = await pool.query(
+      `UPDATE users
+       SET first_name=$1,
+           last_name=$2,
+           email=$3,
+           phone=$4,
+           updated_at=NOW()
+       WHERE id=$5
+       RETURNING id,first_name,last_name,email,phone,role,created_at,
+                 referral_code,activation_status,activated_at`,
+      [firstName, lastName, email, phone, req.session.userId]
+    );
+
+    if (!result.rows[0]) {
+      return res.status(404).json({
+        error: "Compte introuvable."
+      });
+    }
+
+    res.json({
+      ok: true,
+      user: publicUser(result.rows[0])
+    });
+  } catch (err) {
+    if (err.code === "23505") {
+      return res.status(409).json({
+        error: "Cette adresse e-mail est déjà utilisée."
+      });
+    }
+
+    console.error("Profile update error:", err.message);
+    res.status(500).json({
+      error: "Impossible de modifier le profil."
+    });
+  }
+});
+
+/* =========================================
+   ENVOI DE DOCUMENTS CHIFFRÉS
+========================================= */
+
+app.post(
+  "/api/member/documents",
+  requireAuth,
+  privateUpload.single("document"),
+  async (req, res) => {
+    try {
+      const allowedDocumentTypes = [
+        "national_id",
+        "passport",
+        "drivers_license",
+        "voter_card",
+        "biometric_card",
+        "student_card",
+        "school_card"
+      ];
+
+      const documentType = cleanText(req.body.documentType, 40);
+
+      if (!allowedDocumentTypes.includes(documentType)) {
+        return res.status(400).json({
+          error: "Type de document non accepté."
+        });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({
+          error: "Choisis un document à envoyer."
+        });
+      }
+
+      const {
+        encryptedData,
+        iv,
+        authTag
+      } = encryptDocument(req.file.buffer);
+
+      await pool.query(
+        `INSERT INTO member_documents
+         (user_id,document_type,original_name,mime_type,
+          encrypted_data,encryption_iv,auth_tag)
+         VALUES ($1,$2,$3,$4,$5,$6,$7)`,
+        [
+          req.session.userId,
+          documentType,
+          cleanText(req.file.originalname, 255),
+          req.file.mimetype,
+          encryptedData,
+          iv,
+          authTag
+        ]
+      );
+
+      res.status(201).json({
+        ok: true,
+        message: "Document envoyé de manière chiffrée."
+      });
+    } catch (err) {
+      console.error("Document upload error:", err.message);
+      res.status(500).json({
+        error: "Impossible d'envoyer le document."
+      });
+    }
+  }
+);
+
+/* =========================================
+   LISTE DES DOCUMENTS DU MEMBRE
+========================================= */
+
+app.get("/api/member/documents", requireAuth, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT id,document_type,original_name,mime_type,
+              status,submitted_at,reviewed_at
+       FROM member_documents
+       WHERE user_id=$1
+       ORDER BY submitted_at DESC`,
+      [req.session.userId]
+    );
+
+    res.json({
+      documents: result.rows
+    });
+  } catch (err) {
+    console.error("Member documents list error:", err.message);
+    res.status(500).json({
+      error: "Impossible de charger tes documents."
+    });
+  }
+});
+
+/* =========================================
+   DÉCONNEXION
+========================================= */
 
 app.post("/api/auth/logout", requireAuth, (req, res) => {
   req.session.destroy(err => {
@@ -615,7 +654,9 @@ app.post("/api/auth/logout", requireAuth, (req, res) => {
   });
 });
 
-/* INSTALLATION DES MODULES */
+/* =========================================
+   INSTALLATION DES MODULES
+========================================= */
 
 installPayments(app, pool, requireAuth);
 installAdmin(app, pool, requireAuth);
@@ -626,10 +667,14 @@ app.use(express.static(
 ));
 
 app.get("*", (_req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
+  res.sendFile(
+    path.join(__dirname, "public", "index.html")
+  );
 });
 
-/* DÉMARRAGE */
+/* =========================================
+   DÉMARRAGE UNIQUE DU SERVEUR
+========================================= */
 
 initializeDatabase()
   .then(() => {
@@ -641,109 +686,7 @@ initializeDatabase()
     console.error("Database initialization failed:", err.message);
     process.exit(1);
   });
-de = 'WC' || LPAD(id::TEXT, 8, '0')
-    WHERE referral_code IS NULL;
-
-    CREATE UNIQUE INDEX IF NOT EXISTS users_referral_code_idx
-    ON users(referral_code);
-
-    ALTER TABLE users
-    ALTER COLUMN activation_status SET DEFAULT 'pending';
-
-    CREATE TABLE IF NOT EXISTS activation_payments (
-      id BIGSERIAL PRIMARY KEY,
-      user_id BIGINT NOT NULL UNIQUE REFERENCES users(id),
-      amount BIGINT NOT NULL CHECK (amount = 3000),
-      provider_reference VARCHAR(150) UNIQUE,
-      status VARCHAR(20) NOT NULL DEFAULT 'pending',
-      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-      confirmed_at TIMESTAMPTZ
-    );
-
-    CREATE TABLE IF NOT EXISTS member_documents (
-      id BIGSERIAL PRIMARY KEY,
-      user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-      document_type VARCHAR(40) NOT NULL,
-      original_name VARCHAR(255) NOT NULL,
-      mime_type VARCHAR(100) NOT NULL,
-      encrypted_data BYTEA NOT NULL,
-      encryption_iv BYTEA NOT NULL,
-      auth_tag BYTEA NOT NULL,
-      status VARCHAR(20) NOT NULL DEFAULT 'pending',
-      submitted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-      reviewed_at TIMESTAMPTZ,
-      reviewed_by BIGINT REFERENCES users(id)
-    );
-
-    CREATE TABLE IF NOT EXISTS commissions (
-      id BIGSERIAL PRIMARY KEY,
-      referrer_id BIGINT NOT NULL REFERENCES users(id),
-      referred_user_id BIGINT NOT NULL UNIQUE REFERENCES users(id),
-      amount BIGINT NOT NULL DEFAULT 1000 CHECK (amount = 1000),
-      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-    );
-
-    CREATE TABLE IF NOT EXISTS withdrawals (
-      id BIGSERIAL PRIMARY KEY,
-      user_id BIGINT NOT NULL REFERENCES users(id),
-      amount BIGINT NOT NULL CHECK (amount >= 5000),
-      mobile_money_number VARCHAR(30) NOT NULL,
-      status VARCHAR(20) NOT NULL DEFAULT 'pending',
-      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-    );
-  `);
-}
-
-/* =====================================================
-   SANTÉ DU SERVEUR
-===================================================== */
-
-app.get("/api/health", async (req, res) => {
-  try {
-    await pool.query("SELECT 1");
-
-    res.json({
-      ok: true,
-      service: "WIN CASH",
-      database: "connected",
-      realMoneyEnabled: false
-    });
-  } catch {
-    res.status(503).json({
-      ok: false,
-      service: "WIN CASH",
-      database: "unavailable"
-    });
-  }
-});
-
-/* =====================================================
-   INSCRIPTION
-===================================================== */
-
-app.post("/api/auth/register", authLimiter, async (req, res) => {
-  try {
-    const firstName = cleanText(req.body.firstName, 80);
-    const lastName = cleanText(req.body.lastName, 80);
-    const email = cleanText(req.body.email, 254).toLowerCase();
-    const phone = cleanText(req.body.phone, 30);
-    const referralCode = cleanText(
-      req.body.referralCode,
-      30
-    ).toUpperCase();
-
-    const password = typeof req.body.password === "string"
-      ? req.body.password
-      : "";
-
-    if (!firstName || !lastName || !validEmail(email) || !phone) {
-      return res.status(400).json({
-        error: "Vérifie ton nom, prénom, e-mail et téléphone."
-      });
-    }
-
-    if (password.length < 10 || password.length > 200) {
-      return res.status(400).json({
+on({
         error: "Le mot de passe doit contenir au moins 10 caractères."
       });
     }
