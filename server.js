@@ -148,6 +148,44 @@ function requireAuth(req, res, next) {
 
   next();
 }
+async function requireActive(req, res, next) {
+  try {
+    const result = await pool.query(
+      `SELECT role, activation_status
+       FROM users
+       WHERE id = $1`,
+      [req.session.userId]
+    );
+
+    const user = result.rows[0];
+
+    if (!user) {
+      return res.status(401).json({
+        error: "Compte introuvable. Reconnecte-toi."
+      });
+    }
+
+    if (user.role === "admin") {
+      return next();
+    }
+
+    if (user.activation_status !== "active") {
+      return res.status(403).json({
+        error: user.activation_status === "pending"
+          ? "Ton compte est en attente de paiement. Effectue le paiement unique de 3 000 FCFA pour accéder à ton espace."
+          : "Ton compte n'est pas actif. Contacte l'administration."
+      });
+    }
+
+    next();
+  } catch (err) {
+    console.error("Activation check error:", err.message);
+
+    res.status(500).json({
+      error: "Impossible de vérifier l'activation du compte."
+    });
+  }
+}
 
 function getDocumentEncryptionKey() {
   const value = process.env.DOCUMENT_ENCRYPTION_KEY || "";
@@ -498,8 +536,7 @@ app.get("/api/auth/me", requireAuth, async (req, res) => {
    MODIFICATION DU PROFIL
 ========================================= */
 
-app.put("/api/member/profile", requireAuth, async (req, res) => {
-  try {
+app.put("/api/member/profile", requireAuth, requireActive, async (req, res) => {
     const firstName = cleanText(req.body.firstName, 80);
     const lastName = cleanText(req.body.lastName, 80);
     const email = cleanText(req.body.email, 254).toLowerCase();
@@ -556,6 +593,7 @@ app.put("/api/member/profile", requireAuth, async (req, res) => {
 app.post(
   "/api/member/documents",
   requireAuth,
+  requireActive,
   privateUpload.single("document"),
   async (req, res) => {
     try {
@@ -623,7 +661,7 @@ app.post(
    LISTE DES DOCUMENTS DU MEMBRE
 ========================================= */
 
-app.get("/api/member/documents", requireAuth, async (req, res) => {
+app.get("/api/member/documents", requireAuth, requireActive, async (req, res) => {
   try {
     const result = await pool.query(
       `SELECT id,document_type,original_name,mime_type,
