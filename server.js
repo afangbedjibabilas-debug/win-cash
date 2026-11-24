@@ -92,6 +92,53 @@ function requireAuth(req, res, next) {
   next();
 }
 
+app.put("/api/member/profile", requireAuth, async (req, res) => {
+  try {
+    const firstName = cleanText(req.body.firstName, 80);
+    const lastName = cleanText(req.body.lastName, 80);
+    const email = cleanText(req.body.email, 254).toLowerCase();
+    const phone = cleanText(req.body.phone, 30);
+
+    if (!firstName || !lastName || !validEmail(email) || !phone) {
+      return res.status(400).json({
+        error: "Vérifie ton prénom, ton nom, ton e-mail et ton téléphone."
+      });
+    }
+
+    const result = await pool.query(
+      `UPDATE users
+       SET first_name=$1,
+           last_name=$2,
+           email=$3,
+           phone=$4,
+           updated_at=NOW()
+       WHERE id=$5
+       RETURNING id, first_name, last_name, email, phone,
+                 role, created_at, referral_code,
+                 activation_status, activated_at`,
+      [firstName, lastName, email, phone, req.session.userId]
+    );
+
+    if (!result.rows[0]) {
+      return res.status(404).json({ error: "Compte introuvable." });
+    }
+
+    res.json({ ok: true, user: publicUser(result.rows[0]) });
+
+  } catch (err) {
+    if (err.code === "23505") {
+      return res.status(409).json({
+        error: "Cette adresse e-mail est déjà utilisée."
+      });
+    }
+
+    console.error("Profile update error:", err.message);
+    res.status(500).json({
+      error: "Impossible de modifier le profil."
+    });
+  }
+});
+                  
 async function initializeDatabase() {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS users (
