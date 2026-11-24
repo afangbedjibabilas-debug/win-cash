@@ -142,6 +142,55 @@ function encryptDocument(fileBuffer) {
     authTag: cipher.getAuthTag()
   };
 }
+app.post("/api/member/documents", requireAuth, privateUpload.single("document"), async (req, res) => {
+  try {
+    const allowedDocumentTypes = [
+      "national_id",
+      "passport",
+      "drivers_license",
+      "voter_card",
+      "biometric_card",
+      "student_card",
+      "school_card"
+    ];
+
+    const documentType = cleanText(req.body.documentType, 40);
+
+    if (!allowedDocumentTypes.includes(documentType)) {
+      return res.status(400).json({ error: "Type de document non accepté." });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ error: "Choisis un document à envoyer." });
+    }
+
+    const { encryptedData, iv, authTag } = encryptDocument(req.file.buffer);
+
+    await pool.query(
+      `INSERT INTO member_documents
+       (user_id, document_type, original_name, mime_type,
+        encrypted_data, encryption_iv, auth_tag)
+       VALUES ($1,$2,$3,$4,$5,$6,$7)`,
+      [
+        req.session.userId,
+        documentType,
+        cleanText(req.file.originalname, 255),
+        req.file.mimetype,
+        encryptedData,
+        iv,
+        authTag
+      ]
+    );
+
+    res.status(201).json({
+      ok: true,
+      message: "Document envoyé de manière chiffrée."
+    });
+  } catch (err) {
+    console.error("Document upload error:", err.message);
+    res.status(500).json({ error: "Impossible d'envoyer le document." });
+  }
+});
 app.put("/api/member/profile", requireAuth, async (req, res) => {
   try {
     const firstName = cleanText(req.body.firstName, 80);
