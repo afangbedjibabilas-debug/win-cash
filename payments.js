@@ -210,15 +210,23 @@ module.exports = function installPayments(app, pool, requireAuth) {
         const paymentId = checkout.id;
 
         let validUrl = false;
+let checkoutHost = "";
 
-        try {
-          const parsedUrl = new URL(checkoutUrl);
-          validUrl =
-            parsedUrl.protocol === "https:" &&
-            parsedUrl.hostname === "pay.saspay.me";
-        } catch (_) {
-          validUrl = false;
-        }
+try {
+  const parsedUrl = new URL(checkoutUrl);
+  checkoutHost = parsedUrl.hostname;
+
+  validUrl =
+    parsedUrl.protocol === "https:" &&
+    (
+      checkoutHost === "saspay.me" ||
+      checkoutHost.endsWith(".saspay.me")
+    );
+} catch (_) {
+  validUrl = false;
+}
+
+console.log("SASPAY checkout host:", checkoutHost);
 
         if (!paymentId || !validUrl) {
           console.error("SASPAY checkout response incomplete.");
