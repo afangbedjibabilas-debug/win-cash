@@ -253,7 +253,11 @@ email:$("loginEmail").value,
 password:$("loginPassword").value
 })
 });
+if(data.user.role==="admin"){
+window.location.href="/admin.html";
+}else{
 render(data.user);
+}
 }catch(err){$("message").textContent=err.message;}
 };
 
