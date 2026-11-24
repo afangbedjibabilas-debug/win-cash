@@ -7,6 +7,27 @@ const { rateLimit } = require("express-rate-limit");
 const path = require("path");
 const crypto = require("crypto");
 const multer = require("multer");
+const privateUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 5 * 1024 * 1024,
+    files: 1
+  },
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+      "application/pdf"
+    ];
+
+    if (!allowedTypes.includes(file.mimetype)) {
+      return cb(new Error("Format de fichier non accepté."));
+    }
+
+    cb(null, true);
+  }
+});
 const installPayments = require("./payments");
 const installAdmin = require("./admin");
 const app = express();
