@@ -6,6 +6,7 @@ const { Pool } = require("pg");
 const { rateLimit } = require("express-rate-limit");
 const path = require("path");
 const crypto = require("crypto");
+const multer = require("multer");
 const installPayments = require("./payments");
 const installAdmin = require("./admin");
 const app = express();
