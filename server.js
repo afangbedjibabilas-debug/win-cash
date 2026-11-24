@@ -34,7 +34,10 @@ const pool = new Pool({
 });
 
 app.disable("x-powered-by");
-if (isProduction) app.set("trust proxy", 1);
+
+if (isProduction) {
+  app.set("trust proxy", 1);
+}
 
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(express.json({ limit: "20kb" }));
@@ -114,6 +117,7 @@ async function passwordMatches(password, salt, expectedHex) {
     await hashPassword(password, salt),
     "hex"
   );
+
   const expected = Buffer.from(expectedHex, "hex");
 
   return actual.length === expected.length &&
@@ -141,6 +145,7 @@ function requireAuth(req, res, next) {
       error: "Connexion requise."
     });
   }
+
   next();
 }
 
@@ -307,6 +312,7 @@ app.post("/api/auth/register", authLimiter, async (req, res) => {
     const lastName = cleanText(req.body.lastName, 80);
     const email = cleanText(req.body.email, 254).toLowerCase();
     const phone = cleanText(req.body.phone, 30);
+
     const referralCode = cleanText(
       req.body.referralCode,
       30
@@ -329,6 +335,7 @@ app.post("/api/auth/register", authLimiter, async (req, res) => {
     }
 
     const salt = crypto.randomBytes(16).toString("hex");
+
     const newReferralCode =
       "WC" + crypto.randomBytes(4).toString("hex").toUpperCase();
 
@@ -384,6 +391,7 @@ app.post("/api/auth/register", authLimiter, async (req, res) => {
     }
 
     console.error("Registration error:", err.message);
+
     res.status(500).json({
       error: "Une erreur est survenue pendant l'inscription."
     });
@@ -397,6 +405,7 @@ app.post("/api/auth/register", authLimiter, async (req, res) => {
 app.post("/api/auth/login", authLimiter, async (req, res) => {
   try {
     const email = cleanText(req.body.email, 254).toLowerCase();
+
     const password = typeof req.body.password === "string"
       ? req.body.password
       : "";
@@ -444,6 +453,7 @@ app.post("/api/auth/login", authLimiter, async (req, res) => {
     });
   } catch (err) {
     console.error("Login error:", err.message);
+
     res.status(500).json({
       error: "Une erreur est survenue pendant la connexion."
     });
@@ -477,6 +487,7 @@ app.get("/api/auth/me", requireAuth, async (req, res) => {
     });
   } catch (err) {
     console.error("Session user error:", err.message);
+
     res.status(500).json({
       error: "Impossible de vérifier la session."
     });
@@ -531,6 +542,7 @@ app.put("/api/member/profile", requireAuth, async (req, res) => {
     }
 
     console.error("Profile update error:", err.message);
+
     res.status(500).json({
       error: "Impossible de modifier le profil."
     });
@@ -599,6 +611,7 @@ app.post(
       });
     } catch (err) {
       console.error("Document upload error:", err.message);
+
       res.status(500).json({
         error: "Impossible d'envoyer le document."
       });
@@ -626,6 +639,7 @@ app.get("/api/member/documents", requireAuth, async (req, res) => {
     });
   } catch (err) {
     console.error("Member documents list error:", err.message);
+
     res.status(500).json({
       error: "Impossible de charger tes documents."
     });
@@ -661,6 +675,10 @@ app.post("/api/auth/logout", requireAuth, (req, res) => {
 installPayments(app, pool, requireAuth);
 installAdmin(app, pool, requireAuth);
 
+/* =========================================
+   FICHIERS PUBLICS
+========================================= */
+
 app.use(express.static(
   path.join(__dirname, "public"),
   { extensions: ["html"] }
@@ -686,313 +704,3 @@ initializeDatabase()
     console.error("Database initialization failed:", err.message);
     process.exit(1);
   });
-on({
-        error: "Le mot de passe doit contenir au moins 10 caractères."
-      });
-    }
-
-    const salt = crypto.randomBytes(16).toString("hex");
-    const newReferralCode =
-      "WC" + crypto.randomBytes(4).toString("hex").toUpperCase();
-
-    const passwordHash = await hashPassword(password, salt);
-
-    const result = await pool.query(
-      `INSERT INTO users
-       (first_name,last_name,email,phone,password_hash,password_salt,
-        referral_code,referred_by)
-       VALUES
-       ($1,$2,$3,$4,$5,$6,$7,
-        (SELECT id FROM users WHERE referral_code = $8))
-       RETURNING id,first_name,last_name,email,phone,role,created_at,
-                 referral_code,activation_status,activated_at`,
-      [
-        firstName,
-        lastName,
-        email,
-        phone,
-        passwordHash,
-        salt,
-        newReferralCode,
-        referralCode || null
-      ]
-    );
-
-    req.session.regenerate(err => {
-      if (err) {
-        return res.status(500).json({
-          error: "Impossible d'ouvrir la session."
-        });
-      }
-
-      req.session.userId = result.rows[0].id;
-
-      req.session.save(saveErr => {
-        if (saveErr) {
-          return res.status(500).json({
-            error: "Session non enregistrée."
-          });
-        }
-
-        res.status(201).json({
-          user: publicUser(result.rows[0])
-        });
-      });
-    });
-  } catch (err) {
-    if (err.code === "23505") {
-      return res.status(409).json({
-        error: "Cette adresse e-mail possède déjà un compte."
-      });
-    }
-
-    console.error("Registration error:", err.message);
-    res.status(500).json({
-      error: "Une erreur est survenue pendant l'inscription."
-    });
-  }
-});
-
-/* =====================================================
-   CONNEXION
-===================================================== */
-
-app.post("/api/auth/login", authLimiter, async (req, res) => {
-  try {
-    const email = cleanText(req.body.email, 254).toLowerCase();
-    const password = typeof req.body.password === "string"
-      ? req.body.password
-      : "";
-
-    const result = await pool.query(
-      "SELECT * FROM users WHERE email=$1",
-      [email]
-    );
-
-    const user = result.rows[0];
-
-    if (
-      !user ||
-      !(await passwordMatches(
-        password,
-        user.password_salt,
-        user.password_hash
-      ))
-    ) {
-      return res.status(401).json({
-        error: "Adresse e-mail ou mot de passe incorrect."
-      });
-    }
-
-    req.session.regenerate(err => {
-      if (err) {
-        return res.status(500).json({
-          error: "Impossible d'ouvrir la session."
-        });
-      }
-
-      req.session.userId = user.id;
-
-      req.session.save(saveErr => {
-        if (saveErr) {
-          return res.status(500).json({
-            error: "Session non enregistrée."
-          });
-        }
-
-        res.json({
-          user: publicUser(user)
-        });
-      });
-    });
-  } catch (err) {
-    console.error("Login error:", err.message);
-    res.status(500).json({
-      error: "Une erreur est survenue pendant la connexion."
-    });
-  }
-});
-
-/* =====================================================
-   UTILISATEUR CONNECTÉ
-===================================================== */
-
-app.get("/api/auth/me", requireAuth, async (req, res) => {
-  try {
-    const result = await pool.query(
-      `SELECT id,first_name,last_name,email,phone,role,created_at,
-              referral_code,activation_status,activated_at
-       FROM users
-       WHERE id=$1`,
-      [req.session.userId]
-    );
-
-    if (!result.rows[0]) {
-      return req.session.destroy(() => {
-        res.status(401).json({
-          error: "Session expirée."
-        });
-      });
-    }
-
-    res.json({
-      user: publicUser(result.rows[0])
-    });
-  } catch (err) {
-    console.error("Session user error:", err.message);
-    res.status(500).json({
-      error: "Impossible de vérifier la session."
-    });
-  }
-});
-
-/* =====================================================
-   DÉCONNEXION
-===================================================== */
-
-app.post("/api/auth/logout", requireAuth, (req, res) => {
-  req.session.destroy(err => {
-    if (err) {
-      return res.status(500).json({
-        error: "Déconnexion impossible."
-      });
-    }
-
-    res.clearCookie("wincash.sid", {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: isProduction
-    });
-
-    res.json({ ok: true });
-  });
-});
-
-/* =====================================================
-   INSTALLATION DES MODULES
-===================================================== */
-
-installPayments(app, pool, requireAuth);
-installAdmin(app, pool, requireAuth);
-
-app.use(express.static(
-  path.join(__dirname, "public"),
-  { extensions: ["html"] }
-));
-
-app.get("*", (_req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
-});
-
-/* =====================================================
-   DÉMARRAGE
-===================================================== */
-
-initializeDatabase()
-  .then(() => {
-    app.listen(PORT, "0.0.0.0", () => {
-      console.log(`WIN CASH listening on ${PORT}`);
-    });
-  })
-  .catch(err => {
-    console.error("Database initialization failed:", err.message);
-    process.exit(1);
-  });
- catch {
-    res.status(503).json({ ok: false, service: "WIN CASH", database: "unavailable" });
-  }
-});
-
-app.post("/api/auth/register", authLimiter, async (req, res) => {
-  try {
-    const firstName = cleanText(req.body.firstName, 80);
-    const lastName = cleanText(req.body.lastName, 80);
-    const email = cleanText(req.body.email, 254).toLowerCase();
-    const phone = cleanText(req.body.phone, 30);
-const referralCode = cleanText(req.body.referralCode, 30).toUpperCase();
-const password = typeof req.body.password === "string" ? req.body.password : "";
-    if (!firstName || !lastName || !validEmail(email) || !phone) {
-      return res.status(400).json({ error: "Vérifie ton nom, prénom, e-mail et téléphone." });
-    }
-    if (password.length < 10 || password.length > 200) {
-      return res.status(400).json({ error: "Le mot de passe doit contenir au moins 10 caractères." });
-    }
-
-    const salt = crypto.randomBytes(16).toString("hex");const newReferralCode = "WC" + crypto.randomBytes(4).toString("hex").toUpperCase();
-    const passwordHash = await hashPassword(password, salt);
-    const result = await pool.query(
-            `INSERT INTO users (first_name,last_name,email,phone,password_hash,password_salt,referral_code,referred_by)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,(SELECT id FROM users WHERE referral_code = $8))
-       RETURNING id,first_name,last_name,email,phone,role,created_at`,
-      [firstName,lastName,email,phone,passwordHash,salt,newReferralCode,referralCode || null]
-    );
-    req.session.userId = result.rows[0].id;
-    req.session.regenerate((err) => {
-      if (err) return res.status(500).json({ error: "Impossible d'ouvrir la session." });
-      req.session.userId = result.rows[0].id;
-      req.session.save(saveErr => {
-        if (saveErr) return res.status(500).json({ error: "Session non enregistrée." });
-        res.status(201).json({ user: publicUser(result.rows[0]) });
-      });
-    });
-  } catch (err) {
-    if (err.code === "23505") return res.status(409).json({ error: "Cette adresse e-mail possède déjà un compte." });
-    console.error("Registration error:", err.message);
-    res.status(500).json({ error: "Une erreur est survenue pendant l'inscription." });
-  }
-});
-
-app.post("/api/auth/login", authLimiter, async (req, res) => {
-  try {
-    const email = cleanText(req.body.email, 254).toLowerCase();
-    const password = typeof req.body.password === "string" ? req.body.password : "";
-    const result = await pool.query("SELECT * FROM users WHERE email=$1", [email]);
-    const user = result.rows[0];
-    if (!user || !(await passwordMatches(password, user.password_salt, user.password_hash))) {
-      return res.status(401).json({ error: "Adresse e-mail ou mot de passe incorrect." });
-    }
-    req.session.regenerate(err => {
-      if (err) return res.status(500).json({ error: "Impossible d'ouvrir la session." });
-      req.session.userId = user.id;
-      req.session.save(saveErr => {
-        if (saveErr) return res.status(500).json({ error: "Session non enregistrée." });
-        res.json({ user: publicUser(user) });
-      });
-    });
-  } catch (err) {
-    console.error("Login error:", err.message);
-    res.status(500).json({ error: "Une erreur est survenue pendant la connexion." });
-  }
-});
-
-app.get("/api/auth/me", requireAuth, async (req, res) => {
-  const result = await pool.query(
-    "SELECT id,first_name,last_name,email,phone,role,created_at FROM users WHERE id=$1",
-    [req.session.userId]
-  );
-  if (!result.rows[0]) {
-    return req.session.destroy(() => res.status(401).json({ error: "Session expirée." }));
-  }
-  res.json({ user: publicUser(result.rows[0]) });
-});
-
-app.post("/api/auth/logout", requireAuth, (req, res) => {
-  req.session.destroy(err => {
-    if (err) return res.status(500).json({ error: "Déconnexion impossible." });
-    res.clearCookie("wincash.sid", { httpOnly: true, sameSite: "lax", secure: isProduction });
-    res.json({ ok: true });
-  });
-});
-
-
-installPayments(app, pool, requireAuth);
-installAdmin(app, pool, requireAuth);
-app.use(express.static(path.join(__dirname, "public"), { extensions: ["html"] }));
-app.get("*", (_req, res) => res.sendFile(path.join(__dirname, "public", "index.html")));
-
-initializeDatabase().then(() => {
-  app.listen(PORT, "0.0.0.0", () => console.log(`WIN CASH listening on ${PORT}`));
-}).catch(err => {
-  console.error("Database initialization failed:", err.message);
-  process.exit(1);
-});
