@@ -215,6 +215,21 @@ CREATE TABLE IF NOT EXISTS activation_payments (
   confirmed_at TIMESTAMPTZ
 );
 
+CREATE TABLE IF NOT EXISTS member_documents (
+  id BIGSERIAL PRIMARY KEY,
+  user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  document_type VARCHAR(40) NOT NULL,
+  original_name VARCHAR(255) NOT NULL,
+  mime_type VARCHAR(100) NOT NULL,
+  encrypted_data BYTEA NOT NULL,
+  encryption_iv BYTEA NOT NULL,
+  auth_tag BYTEA NOT NULL,
+  status VARCHAR(20) NOT NULL DEFAULT 'pending',
+  submitted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  reviewed_at TIMESTAMPTZ,
+    reviewed_by BIGINT REFERENCES users(id)
+);
+
 CREATE TABLE IF NOT EXISTS commissions (
   id BIGSERIAL PRIMARY KEY,
   referrer_id BIGINT NOT NULL REFERENCES users(id),
