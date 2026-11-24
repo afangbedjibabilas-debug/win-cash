@@ -26,13 +26,33 @@ async function sasPayRequest(endpoint, options = {}) {
 
   const body = await response.json().catch(() => ({}));
 
-  if (!response.ok || body.success === false) {
-    console.error("SASPAY error:", response.status, JSON.stringify(body));
-    const error = new Error("La demande SASPAY a été refusée.");
-    error.status = response.status;
-    throw error;
-  }
+const data = body.data && typeof body.data === "object"
+  ? body.data
+  : {};
 
+console.log("SASPAY response:", JSON.stringify({
+  httpStatus: response.status,
+  success: body.success,
+  code: body.code,
+  dataKeys: Object.keys(data),
+  hasId: Boolean(data.id),
+  hasCheckoutUrl: Boolean(data.checkout_url)
+}));
+
+if (!response.ok || body.success === false) {
+  console.error("SASPAY error:", JSON.stringify({
+    httpStatus: response.status,
+    success: body.success,
+    code: body.code,
+    dataKeys: Object.keys(data)
+  }));
+
+  const error = new Error("La demande SASPAY a été refusée.");
+  error.status = response.status;
+  throw error;
+}
+
+return data;
   return body.data || {};
 }
 
