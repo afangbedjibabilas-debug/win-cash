@@ -4,122 +4,144 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#101d32">
+<meta name="theme-color" content="#080d18">
 <title>WIN CASH — Espace membre</title>
 
 <style>
 :root{
   font-family:Arial,sans-serif;
-  color:#252747;
-  background:#eef0ff;
+  color:#f4f5f8;
+  background:#080d18;
+  --bg:#080d18;
+  --panel:#111a2a;
+  --panel2:#172337;
+  --gold:#d9ad52;
+  --gold2:#f4d58a;
+  --white:#f4f5f8;
+  --muted:#9aa7ba;
+  --border:#26344a;
 }
 *{box-sizing:border-box}
-body{margin:0;min-height:100vh;background:#eef0ff}
-.top{
-  background:#fff;
-  color:#252747;
-  padding:22px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  box-shadow:0 2px 12px #0000000c;
-}
-.brand{font-size:27px;font-weight:900;color:#6556d9}
-.wrap{max-width:1100px;margin:22px auto;padding:0 15px}
-.card{
-  background:white;
-  border:0;
-  border-radius:22px;
-  padding:20px;
-  margin-bottom:15px;
-  box-shadow:0 5px 18px #313b7610;
-}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--white)}
+button,input,select{font:inherit}
 button{
-  border:0;border-radius:12px;padding:12px 15px;
-  background:#6758dc;color:white;font-weight:bold;cursor:pointer
+  border:1px solid transparent;border-radius:11px;padding:12px 15px;
+  background:linear-gradient(120deg,#c2943c,#f0d28a);
+  color:#111827;font-weight:800;cursor:pointer
 }
-button.secondary{background:#eef0fa;color:#34375b}
+button.secondary{background:#1b2940;color:#f4f5f8;border-color:#31415a}
+button:hover{filter:brightness(1.08)}
 input,select{
-  width:100%;padding:13px;border:1px solid #cbd5e1;
-  border-radius:10px;font:inherit
+  width:100%;padding:13px;background:#0b1423;
+  border:1px solid #34435b;border-radius:10px;
+  color:white;outline:none
 }
-label{display:block;margin:13px 0 6px;font-weight:bold}
+input:focus,select:focus{border-color:var(--gold)}
+label{display:block;margin:13px 0 6px;font-weight:bold;color:#e8d5aa}
 form button{width:100%;margin-top:18px}
 .hidden{display:none!important}
-.muted{color:#85899c;font-size:13px;line-height:1.5}
-.error{color:#b42318;margin-top:12px}
+.muted{color:var(--muted);font-size:13px;line-height:1.6}
+.error{color:#ff8888;margin-top:12px}
+.top{
+  background:#0d1625;color:white;padding:17px 22px;
+  display:flex;justify-content:space-between;align-items:center;
+  border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:10
+}
+.brand{font-size:27px;font-weight:900;letter-spacing:1px;color:var(--gold)}
+.brand small{display:block;font-size:10px;letter-spacing:3px;color:#d8dce5}
+.wrap{max-width:1200px;margin:22px auto;padding:0 15px}
+.card{
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:18px;padding:20px;margin-bottom:15px;
+  box-shadow:0 8px 25px #0003
+}
+.auth{max-width:520px;margin:35px auto}
 .tabs{display:flex;gap:8px;margin-bottom:18px}
 .tabs button{flex:1}
-.auth{max-width:520px;margin:35px auto}
-.layout{display:grid;grid-template-columns:230px 1fr;gap:16px}
-.menu{display:grid;gap:7px}
+.layout{display:grid;grid-template-columns:245px 1fr;gap:16px}
+.menu{display:grid;gap:7px;margin-top:17px}
 .menu button{
-  text-align:left;background:#f3f3fb;color:#34375b;
-  border-radius:11px
+  text-align:left;background:#172337;color:#dce3ed;
+  border:1px solid #263750;border-radius:10px
 }
-.menu button.active{background:#6758dc;color:white}
-.info{background:#f7f8fc;padding:13px;border-radius:10px;margin:8px 0}
+.menu button.active{
+  background:linear-gradient(110deg,#b98a35,#e8c879);
+  color:#101725;border-color:var(--gold)
+}
+.info{background:#172337;padding:13px;border-radius:10px;margin:8px 0;color:#e5e9ef}
 .notice{
-  background:#fff7e6;padding:14px;border-radius:12px;
-  color:#75551c;font-size:13px;line-height:1.5;margin:15px 0
+  background:#2b2417;padding:14px;border-radius:12px;
+  color:#f0d69e;font-size:13px;line-height:1.6;
+  margin:15px 0;border:1px solid #69552c
 }
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-footer{text-align:center;color:#85899c;font-size:12px;margin:25px}
-
+footer{text-align:center;color:var(--muted);font-size:12px;margin:25px}
 .dashboard-header{
   display:flex;justify-content:space-between;
   align-items:center;flex-wrap:wrap;gap:10px
 }
 .dashboard-header h2{margin-bottom:5px}
+.section-title{font-size:22px;font-weight:900;margin-top:0}
 .stats-grid{
-  display:grid;grid-template-columns:1fr 1fr;
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
   gap:13px;margin:20px 0
 }
 .stat-card{
-  padding:22px 17px;border-radius:25px;color:white;
-  min-height:120px;box-shadow:0 7px 18px #30305018
+  padding:22px 17px;border-radius:17px;
+  color:white;min-height:115px;
+  border:1px solid #ffffff16;
+  background:linear-gradient(135deg,#18283d,#101a2a)
 }
-.stat-card span{display:block;font-size:15px;margin-bottom:14px}
-.stat-card strong{font-size:23px}
-.stat-purple{background:linear-gradient(120deg,#8050df,#526be8)}
-.stat-blue{background:linear-gradient(120deg,#24a9ed,#08cbd5)}
-.stat-green{background:linear-gradient(120deg,#13ad8b,#29d88c)}
-.stat-orange{background:linear-gradient(120deg,#f39a42,#f4c348)}
-.stat-pink{background:linear-gradient(120deg,#b58bd9,#e7a9d8)}
-.stat-wide{grid-column:1/-1;background:linear-gradient(120deg,#6755c9,#8a4db0)}
+.stat-card span{display:block;font-size:14px;margin-bottom:14px;color:#cbd4e2}
+.stat-card strong{font-size:23px;color:var(--gold2)}
+.stat-gold{background:linear-gradient(130deg,#60451d,#a77b2e)}
+.stat-blue{background:linear-gradient(130deg,#152e4b,#1d4964)}
+.stat-green{background:linear-gradient(130deg,#153c34,#17634d)}
+.stat-dark{background:linear-gradient(130deg,#20283a,#111827)}
+.stat-wide{grid-column:1/-1}
 .home-section{
-  background:white;padding:20px;border-radius:20px;
-  margin:18px 0;box-shadow:0 4px 15px #3030500b
+  background:#111a2a;padding:20px;border-radius:17px;
+  margin:18px 0;border:1px solid var(--border)
 }
-.home-section h3{margin-top:0}
-.video-placeholder{
-  background:linear-gradient(135deg,#101d32,#5146a8);
-  color:white;border-radius:18px;min-height:190px;
-  display:flex;align-items:center;justify-content:center;
-  text-align:center;padding:20px
+.home-section h3{margin-top:0;color:var(--gold2)}
+.video-frame{
+  background:#050a12;border-radius:15px;
+  overflow:hidden;border:1px solid #5e4b28;
+  text-align:center
 }
+.video-frame img{
+  display:block;width:100%;height:auto;
+  max-height:440px;object-fit:contain;margin:auto
+}
+.video-caption{padding:13px;color:#f1d99f;font-weight:bold}
 .schedule-item{
-  background:#f5f6fc;border-radius:14px;padding:15px;
-  margin:10px 0;display:flex;justify-content:space-between;
+  background:#172337;border:1px solid #293a53;
+  border-radius:12px;padding:15px;margin:10px 0;
+  display:flex;justify-content:space-between;
   align-items:center;gap:10px
 }
 .schedule-day{
-  background:#e9e8ff;color:#6553c7;
+  background:#49391e;color:#f4d58a;
   border-radius:20px;padding:8px 12px;
-  font-weight:bold;font-size:12px
+  font-weight:bold;font-size:12px;white-space:nowrap
 }
-.section-title{font-size:21px;font-weight:800;margin-top:0}
+.page-heading{color:var(--gold2);margin-top:0}
+.profile-box{background:#172337;padding:15px;border-radius:12px}
+.menu-title{color:var(--gold2);font-size:12px;letter-spacing:2px}
 @media(max-width:700px){
   .layout{grid-template-columns:1fr}
   .menu{grid-template-columns:1fr 1fr}
-  .menu button{text-align:center;font-size:12px;padding:11px 5px}
+  .menu button{text-align:center;font-size:12px;padding:12px 5px}
   .grid{grid-template-columns:1fr}
+  .top{padding:14px}
 }
 @media(max-width:420px){
   .stats-grid{gap:9px}
-  .stat-card{padding:17px 12px;min-height:108px}
+  .stat-card{padding:16px 12px;min-height:105px}
   .stat-card strong{font-size:19px}
-  .stat-card span{font-size:13px}
+  .stat-card span{font-size:12px}
+  .brand{font-size:23px}
 }
 </style>
 </head>
@@ -128,8 +150,8 @@ footer{text-align:center;color:#85899c;font-size:12px;margin:25px}
 
 <header class="top">
   <div>
-    <div class="brand">WIN CASH</div>
-    <div class="muted">Ton espace membre</div>
+    <div class="brand">WIN CASH<small>INVESTMENT</small></div>
+    <div class="muted">Votre ambition, notre priorité !</div>
   </div>
   <strong id="headerMember">Membre</strong>
 </header>
@@ -137,9 +159,10 @@ footer{text-align:center;color:#85899c;font-size:12px;margin:25px}
 <main class="wrap">
 
 <section id="auth" class="card auth">
+  <div class="brand" style="text-align:center;margin-bottom:20px">WIN CASH</div>
   <div class="tabs">
-    <button id="showLogin" class="secondary" type="button">Connexion</button>
-    <button id="showRegister" type="button">Inscription</button>
+    <button id="showLogin" type="button">Connexion</button>
+    <button id="showRegister" class="secondary" type="button">Inscription</button>
   </div>
 
   <form id="registerForm" class="hidden">
@@ -167,36 +190,37 @@ footer{text-align:center;color:#85899c;font-size:12px;margin:25px}
   </form>
 
   <div id="message" role="status"></div>
-  <p class="muted">Bienvenue sur la plateforme WIN CASH.</p>
+  <p class="muted" style="text-align:center">Bienvenue sur la plateforme WIN CASH.</p>
 </section>
 
 <section id="dashboard" class="hidden">
 <div class="layout">
 
 <aside class="card">
-  <strong>WIN CASH</strong>
+  <div class="brand">WIN CASH</div>
+  <p class="menu-title">ESPACE PERSONNEL</p>
   <h3 id="welcomeName">Bienvenue</h3>
 
   <nav class="menu">
-    <button class="active" data-page="overview">🏠 Tableau de bord</button>
-    <button data-page="revenues">💰 Revenus</button>
-    <button data-page="tasks">📋 Tâches</button>
+    <button class="active" data-page="overview">⌂ Tableau de bord</button>
+    <button data-page="revenues">◆ Revenus</button>
+    <button data-page="tasks">▤ Tâches</button>
     <button data-page="channels">▶ Nos chaînes</button>
-    <button data-page="games">🎮 Jeux</button>
-    <button data-page="training">🎓 Formation</button>
-    <button data-page="tiktok">🎵 Formation TikTok</button>
-    <button data-page="design">🎨 Formation Design</button>
-    <button data-page="history">📚 Historique</button>
-    <button data-page="profile">👤 Mon profil</button>
-    <button data-page="deposit">💳 Dépôt</button>
-    <button data-page="withdraw">💸 Retrait</button>
-    <button data-page="referral">🤝 Parrainage</button>
-    <button data-page="loan">🏦 Demande de prêt</button>
-    <button data-page="about">ℹ À propos</button>
+    <button data-page="games">◎ Jeux</button>
+    <button data-page="training">▣ Formation</button>
+    <button data-page="tiktok">♪ Formation TikTok</button>
+    <button data-page="design">✎ Formation Design</button>
+    <button data-page="history">◷ Historique</button>
+    <button data-page="profile">♙ Mon profil</button>
+    <button data-page="deposit">＋ Dépôt</button>
+    <button data-page="withdraw">↗ Retrait</button>
+    <button data-page="referral">♧ Parrainage</button>
+    <button data-page="loan">▣ Demander un prêt</button>
+    <button data-page="about">ⓘ À propos</button>
   </nav>
 
   <br>
-  <button id="logout" class="secondary" type="button">
+  <button id="logout" class="secondary" type="button" style="width:100%">
     Se déconnecter
   </button>
 </aside>
@@ -210,115 +234,343 @@ footer{text-align:center;color:#85899c;font-size:12px;margin:25px}
       <h2 class="section-title">Tableau de bord</h2>
       <p class="muted">Bienvenue dans votre espace WIN CASH.</p>
     </div>
-    <strong id="dashboardMemberName">WIN CASH</strong>
+    <strong id="dashboardMemberName" style="color:var(--gold2)">WIN CASH</strong>
   </div>
 
   <div class="stats-grid">
-    <div class="stat-card stat-purple">
-      <span>Dépenses</span>
-      <strong>XOF 0</strong>
+    <div class="stat-card stat-dark">
+      <span>Dépenses</span><strong>XOF 0</strong>
     </div>
-    <div class="stat-card stat-blue">
-      <span>Profit</span>
-      <strong>XOF 0</strong>
+    <div class="stat-card stat-gold">
+      <span>Profit</span><strong>XOF 0</strong>
     </div>
-    <div class="stat-card stat-wide">
-      <span>🎮 Solde des jeux</span>
-      <strong>XOF 0</strong>
+    <div class="stat-card stat-wide stat-blue">
+      <span>◎ Solde des jeux</span><strong>XOF 0</strong>
     </div>
     <div class="stat-card stat-green">
-      <span>Solde revenu</span>
-      <strong>XOF 0</strong>
+      <span>Solde revenu</span><strong>XOF 0</strong>
     </div>
-    <div class="stat-card stat-orange">
-      <span>Solde fortune</span>
-      <strong>XOF 0</strong>
+    <div class="stat-card stat-gold">
+      <span>Solde fortune</span><strong>XOF 0</strong>
     </div>
-    <div class="stat-card stat-pink">
-      <span>Points des tâches</span>
-      <strong>0 pts</strong>
+    <div class="stat-card stat-dark">
+      <span>Points des tâches</span><strong>0 pts</strong>
     </div>
-    <div class="stat-card stat-blue">
-      <span>Retraits totaux</span>
-      <strong>XOF 0</strong>
+    <div class="stat-card stat-wide stat-blue">
+      <span>Retraits totaux</span><strong>XOF 0</strong>
     </div>
   </div>
 
   <div class="home-section">
-    <h3>Présentation WIN CASH</h3>
-    <div class="video-placeholder">
-      <div>
-        <div style="font-size:45px">▶</div>
-        <strong>Vidéo de présentation WIN CASH</strong>
-        <p style="font-size:13px">Votre vidéo sera intégrée ici.</p>
-      </div>
+    <h3>Présentation officielle WIN CASH</h3>
+    <div class="video-frame">
+      <img src="/wincash-presentation.gif"
+           alt="Animation de présentation WIN CASH">
+      <div class="video-caption">WIN CASH — Votre ambition, notre priorité !</div>
     </div>
   </div>
 
   <div class="home-section">
     <h3>Programme des activités</h3>
     <div class="schedule-item">
-      <strong>🎮 Activités et jeux</strong>
-      <span class="schedule-day">Lundi</span>
+      <strong>◎ Activités et jeux</strong><span class="schedule-day">Lundi</span>
     </div>
     <div class="schedule-item">
-      <strong>🎵 Vidéos TikTok</strong>
-      <span class="schedule-day">Mardi</span>
+      <strong>♪ Vidéos TikTok</strong><span class="schedule-day">Mardi</span>
     </div>
     <div class="schedule-item">
-      <strong>▶ Vidéos YouTube</strong>
-      <span class="schedule-day">Mercredi</span>
+      <strong>▶ Vidéos YouTube</strong><span class="schedule-day">Mercredi</span>
     </div>
     <div class="schedule-item">
-      <strong>🎮 Activités et jeux</strong>
-      <span class="schedule-day">Jeudi</span>
+      <strong>◎ Activités et jeux</strong><span class="schedule-day">Jeudi</span>
     </div>
     <div class="schedule-item">
-      <strong>📸 Vidéos Instagram</strong>
-      <span class="schedule-day">Vendredi</span>
+      <strong>▣ Vidéos Instagram</strong><span class="schedule-day">Vendredi</span>
     </div>
   </div>
 
   <div id="overviewInfo"></div>
 
   <div class="notice">
-    Les soldes affichés sont provisoires. Les opérations financières
-    seront affichées après leur activation et leur connexion au système.
+    Les montants affichés sont provisoires. Ils ne représentent pas des
+    soldes financiers réels tant que les fonctionnalités correspondantes
+    ne sont pas connectées au serveur.
   </div>
 </div>
 
 <div id="page-revenues" class="hidden">
-  <h2>Mes revenus</h2>
+  <h2 class="page-heading">Mes revenus</h2>
   <div class="notice">Le suivi des revenus sera disponible lorsque les activités rémunérées seront configurées.</div>
 </div>
 
 <div id="page-tasks" class="hidden">
-  <h2>Mes tâches</h2>
+  <h2 class="page-heading">Mes tâches</h2>
   <p class="muted">Retrouvez ici les activités disponibles.</p>
   <div class="notice">Les tâches quotidiennes seront activées après leur programmation.</div>
 </div>
 
 <div id="page-channels" class="hidden">
-  <h2>Nos chaînes</h2>
+  <h2 class="page-heading">Nos chaînes</h2>
   <div class="info">▶ Chaîne YouTube WIN CASH</div>
-  <div class="info">🎵 Chaîne TikTok WIN CASH</div>
-  <div class="info">📸 Instagram WIN CASH</div>
+  <div class="info">♪ Chaîne TikTok WIN CASH</div>
+  <div class="info">▣ Instagram WIN CASH</div>
   <div class="notice">Les liens officiels des chaînes seront ajoutés ici.</div>
 </div>
 
 <div id="page-games" class="hidden">
-  <h2>Jeux</h2>
+  <h2 class="page-heading">Jeux</h2>
   <div class="notice">Les jeux seront activés après la programmation de leurs règles et de leur système de suivi.</div>
 </div>
 
 <div id="page-training" class="hidden">
-  <h2>Formation</h2>
+  <h2 class="page-heading">Formation</h2>
   <div class="notice">Les contenus de formation seront publiés ici.</div>
 </div>
 
 <div id="page-tiktok" class="hidden">
-  <h2>Formation TikTok</h2>
+  <h2 class="page-heading">Formation TikTok</h2>
   <div class="notice">Les contenus de formation TikTok seront publiés ici.</div>
+</div>
+
+<div id="page-design" class="hidden">
+  <h2 class="page-heading">Formation Design Graphique</h2>
+  <div class="notice">Les contenus de formation en design graphique seront publiés ici.</div>
+</div>
+
+<div id="page-history" class="hidden">
+  <h2 class="page-heading">Historique</h2>
+  <p class="muted">Retrouvez ici le suivi de vos opérations et demandes.</p>
+  <div class="notice">L'historique sera disponible lorsque les opérations seront activées.</div>
+</div>
+
+<div id="page-profile" class="hidden">
+  <h2 class="page-heading">Mon profil</h2>
+  <div id="profileInfo"></div>
+  <div class="notice">
+    La modification du profil et l'envoi des documents nécessitent
+    un système sécurisé côté serveur.
+  </div>
+  <h3>Documents acceptés</h3>
+  <div class="grid">
+    <div class="info">Carte nationale d'identité</div>
+    <div class="info">Passeport</div>
+    <div class="info">Permis de conduire</div>
+    <div class="info">Carte d'électeur</div>
+    <div class="info">Carte biométrique</div>
+    <div class="info">Carte d'étudiant</div>
+    <div class="info">Carte scolaire</div>
+  </div>
+  <p class="muted">Les cartes scolaires et étudiantes pourront servir de justificatifs complémentaires.</p>
+  <p><strong>Statut du dossier :</strong> En attente de mise en service</p>
+</div>
+
+<div id="page-deposit" class="hidden">
+  <h2 class="page-heading">Dépôt</h2>
+  <div class="notice">
+    Les dépôts sont temporairement indisponibles. N'envoyez aucun paiement
+    avant l'activation du moyen officiel de paiement WIN CASH.
+  </div>
+</div>
+
+<div id="page-withdraw" class="hidden">
+  <h2 class="page-heading">Retrait</h2>
+  <div class="notice">
+    Les retraits ne sont pas encore activés. Ils seront disponibles
+    après la mise en place d'un système sécurisé.
+  </div>
+</div>
+
+<div id="page-referral" class="hidden">
+  <h2 class="page-heading">Mon code parrainage</h2>
+  <div class="info"><strong id="myReferralCode">Non disponible</strong></div>
+  <button id="copyReferral" type="button">Copier mon code</button>
+  <p id="referralMessage" class="muted"></p>
+</div>
+
+<div id="page-loan" class="hidden">
+  <h2 class="page-heading">Demander un prêt</h2>
+  <div class="notice">
+    Le formulaire de demande de prêt sera activé après définition
+    des conditions, critères d'éligibilité et modalités de traitement.
+  </div>
+</div>
+
+<div id="page-about" class="hidden">
+  <h2 class="page-heading">À propos de WIN CASH</h2>
+  <p>Bienvenue dans la communauté WIN CASH.</p>
+  <div class="notice">
+    Découvrez nos activités, nos contenus et les fonctionnalités
+    disponibles dans votre espace membre.
+  </div>
+</div>
+
+</section>
+</div>
+</section>
+
+<footer>WIN CASH · Espace membre sécurisé</footer>
+</main>
+
+<script>
+const $=id=>document.getElementById(id);
+let currentUser=null;
+
+async function api(url,options={}){
+  const response=await fetch(url,{
+    ...options,
+    headers:{"Content-Type":"application/json",...(options.headers||{})},
+    credentials:"same-origin"
+  });
+  const data=await response.json().catch(()=>({error:"Réponse invalide du serveur."}));
+  if(!response.ok)throw new Error(data.error||"Une erreur est survenue.");
+  return data;
+}
+
+function show(mode){
+  $("loginForm").classList.toggle("hidden",mode!=="login");
+  $("registerForm").classList.toggle("hidden",mode!=="register");
+  $("showLogin").className=mode==="login"?"":"secondary";
+  $("showRegister").className=mode==="register"?"":"secondary";
+  $("message").textContent="";
+}
+
+function addInfo(container,label,value){
+  const p=document.createElement("div");
+  p.className="info";
+  const b=document.createElement("strong");
+  b.textContent=label+" : ";
+  p.append(b,document.createTextNode(value||"Non renseigné"));
+  container.appendChild(p);
+}
+
+function render(user){
+  currentUser=user;
+  $("auth").classList.add("hidden");
+  $("dashboard").classList.remove("hidden");
+
+  const name=user.firstName||"membre";
+  $("welcomeName").textContent="Bonjour, "+name;
+  $("headerMember").textContent=name;
+  $("dashboardMemberName").textContent=name;
+
+  $("overviewInfo").replaceChildren();
+  $("profileInfo").replaceChildren();
+
+  addInfo($("overviewInfo"),"Nom",user.lastName);
+  addInfo($("overviewInfo"),"Prénom",user.firstName);
+  addInfo($("overviewInfo"),"E-mail",user.email);
+  addInfo($("overviewInfo"),"Téléphone",user.phone);
+
+  addInfo($("profileInfo"),"Prénom",user.firstName);
+  addInfo($("profileInfo"),"Nom",user.lastName);
+  addInfo($("profileInfo"),"E-mail",user.email);
+  addInfo($("profileInfo"),"Téléphone",user.phone);
+  addInfo($("profileInfo"),"Type de compte",user.role==="admin"?"Administrateur":"Membre");
+
+  $("myReferralCode").textContent=user.referralCode||"Non disponible";
+  openPage("overview");
+}
+
+function openPage(name){
+  document.querySelectorAll("[id^='page-']").forEach(el=>el.classList.add("hidden"));
+  const page=$("page-"+name);
+  if(page)page.classList.remove("hidden");
+
+  document.querySelectorAll(".menu button").forEach(btn=>{
+    btn.classList.toggle("active",btn.dataset.page===name);
+  });
+}
+
+document.querySelectorAll(".menu button").forEach(btn=>{
+  btn.onclick=()=>openPage(btn.dataset.page);
+});
+
+$("showLogin").onclick=()=>show("login");
+$("showRegister").onclick=()=>show("register");
+
+$("registerForm").onsubmit=async e=>{
+  e.preventDefault();
+  $("message").textContent="Création du compte en cours...";
+  try{
+    const data=await api("/api/auth/register",{
+      method:"POST",
+      body:JSON.stringify({
+        firstName:$("firstName").value,
+        lastName:$("lastName").value,
+        email:$("regEmail").value,
+        phone:$("phone").value,
+        referralCode:$("referralCode").value,
+        password:$("regPassword").value
+      })
+    });
+    render(data.user);
+  }catch(err){
+    $("message").textContent=err.message;
+  }
+};
+
+$("loginForm").onsubmit=async e=>{
+  e.preventDefault();
+  $("message").textContent="Connexion en cours...";
+  try{
+    const data=await api("/api/auth/login",{
+      method:"POST",
+      body:JSON.stringify({
+        email:$("loginEmail").value,
+        password:$("loginPassword").value
+      })
+    });
+    if(data.user.role==="admin"){
+      window.location.href="/admin.html";
+    }else{
+      render(data.user);
+    }
+  }catch(err){
+    $("message").textContent=err.message;
+  }
+};
+
+$("copyReferral").onclick=async()=>{
+  const code=currentUser&&currentUser.referralCode;
+  if(!code){
+    $("referralMessage").textContent="Aucun code disponible.";
+    return;
+  }
+  try{
+    await navigator.clipboard.writeText(code);
+    $("referralMessage").textContent="Code copié.";
+  }catch{
+    $("referralMessage").textContent="Copie impossible sur cet appareil. Sélectionnez le code pour le copier.";
+  }
+};
+
+$("logout").onclick=async()=>{
+  try{
+    await api("/api/auth/logout",{method:"POST",body:"{}"});
+    currentUser=null;
+    $("dashboard").classList.add("hidden");
+    $("auth").classList.remove("hidden");
+    show("login");
+  }catch(err){
+    alert(err.message);
+  }
+};
+
+(async()=>{
+  try{
+    const data=await api("/api/auth/me");
+    if(data.user.role==="admin"){
+      window.location.href="/admin.html";
+    }else{
+      render(data.user);
+    }
+  }catch{}
+})();
+</script>
+
+</body>
+</html>
+.</div>
 </div>
 
 <div id="page-design" class="hidden">
