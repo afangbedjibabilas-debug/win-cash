@@ -27,7 +27,7 @@ async function sasPayRequest(endpoint, options = {}) {
   const body = await response.json().catch(() => ({}));
 
   if (!response.ok || body.success === false) {
-    console.error("SASPAY error:", response.status, body.code || "");
+    console.error("SASPAY error:", response.status, JSON.stringify(body));
     const error = new Error("La demande SASPAY a été refusée.");
     error.status = response.status;
     throw error;
