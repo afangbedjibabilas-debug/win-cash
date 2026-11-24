@@ -8,14 +8,25 @@
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:Arial,sans-serif;background:#f3f5f9;color:#182230}
-header{background:#101c35;color:white;padding:20px}
+header{
+  background:#101c35;color:white;padding:20px;
+  display:flex;justify-content:space-between;
+  align-items:center;gap:15px;flex-wrap:wrap
+}
 header h1{margin:0 0 8px;font-size:23px}
 header p{margin:0;color:#cbd5e1;font-size:13px}
 main{max-width:1200px;margin:auto;padding:16px}
 nav{display:flex;gap:8px;overflow-x:auto;padding:8px 0 14px}
-nav button{white-space:nowrap;border:0;border-radius:8px;padding:11px 14px;background:#e2e8f0;color:#182230;font-weight:bold}
+nav button{
+  white-space:nowrap;border:0;border-radius:8px;
+  padding:11px 14px;background:#e2e8f0;
+  color:#182230;font-weight:bold
+}
 nav button.active{background:#174ea6;color:white}
-.panel{background:white;border-radius:12px;padding:16px;margin-bottom:15px;box-shadow:0 2px 8px #0000000c}
+.panel{
+  background:white;border-radius:12px;padding:16px;
+  margin-bottom:15px;box-shadow:0 2px 8px #0000000c
+}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:12px}
 .stat{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:15px}
 .stat span{display:block;color:#64748b;font-size:13px;margin-bottom:8px}
@@ -37,12 +48,24 @@ button.action{border:0;border-radius:6px;padding:8px 10px;margin:2px;font-weight
 #notice{color:#166534;background:#dcfce7;padding:12px;border-radius:8px;margin-bottom:12px}
 .muted{color:#64748b;font-size:13px}
 .refresh{background:#174ea6;color:white;border:0;border-radius:8px;padding:10px 14px;font-weight:bold}
+.logout{
+  background:#dc3545;color:white;border:0;
+  border-radius:8px;padding:11px 15px;font-weight:bold;
+  cursor:pointer
+}
+.logout:disabled{opacity:.6;cursor:wait}
 </style>
 </head>
 <body>
+
 <header>
-<h1>WIN CASH — Administration</h1>
-<p id="welcome">Espace sécurisé de gestion</p>
+  <div>
+    <h1>WIN CASH — Administration</h1>
+    <p id="welcome">Espace sécurisé de gestion</p>
+  </div>
+  <button class="logout" id="logout" type="button">
+    Se déconnecter
+  </button>
 </header>
 
 <main>
@@ -282,6 +305,26 @@ function renderOperationTable(bodyId,emptyId,items) {
   el(emptyId).classList.toggle("hidden",items.length > 0);
 }
 
+async function logout() {
+  const button = el("logout");
+  if (!confirm("Voulez-vous vraiment vous déconnecter de WIN CASH ?")) return;
+
+  button.disabled = true;
+  button.textContent = "Déconnexion...";
+
+  try {
+    await api("/api/auth/logout", {
+      method:"POST",
+      body:"{}"
+    });
+    window.location.replace("/");
+  } catch(e) {
+    button.disabled = false;
+    button.textContent = "Se déconnecter";
+    error("Impossible de fermer la session : " + e.message);
+  }
+}
+
 async function load() {
   el("error").classList.add("hidden");
 
@@ -289,7 +332,8 @@ async function load() {
     const me = await api("/api/auth/me");
 
     if (!me.user || me.user.role !== "admin") {
-      throw new Error("Accès réservé aux administrateurs.");
+      window.location.replace("/");
+      return;
     }
 
     el("welcome").textContent =
@@ -319,7 +363,6 @@ async function load() {
 
     const referralRows = el("referralRows");
     referralRows.replaceChildren();
-
     const referralItems = referrals.referrals || [];
 
     referralItems.forEach(u => {
@@ -338,7 +381,6 @@ async function load() {
 
     const historyRows = el("historyRows");
     historyRows.replaceChildren();
-
     const historyItems = history.history || [];
 
     historyItems.forEach(item => {
@@ -369,6 +411,8 @@ document.querySelectorAll("nav button").forEach(button => {
 
 el("memberSearch").addEventListener("input",()=>renderMembers(allUsers));
 el("refresh").addEventListener("click",load);
+el("logout").addEventListener("click",logout);
+
 load();
 </script>
 </body>
