@@ -537,6 +537,7 @@ app.get("/api/auth/me", requireAuth, async (req, res) => {
 ========================================= */
 
 app.put("/api/member/profile", requireAuth, requireActive, async (req, res) => {
+  try {
     const firstName = cleanText(req.body.firstName, 80);
     const lastName = cleanText(req.body.lastName, 80);
     const email = cleanText(req.body.email, 254).toLowerCase();
