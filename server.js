@@ -113,7 +113,35 @@ function requireAuth(req, res, next) {
   if (!req.session.userId) return res.status(401).json({ error: "Connexion requise." });
   next();
 }
+function getDocumentEncryptionKey() {
+  const value = process.env.DOCUMENT_ENCRYPTION_KEY || "";
 
+  if (!/^[0-9a-fA-F]{64}$/.test(value)) {
+    throw new Error("DOCUMENT_ENCRYPTION_KEY invalide.");
+  }
+
+  return Buffer.from(value, "hex");
+}
+
+function encryptDocument(fileBuffer) {
+  const iv = crypto.randomBytes(12);
+  const cipher = crypto.createCipheriv(
+    "aes-256-gcm",
+    getDocumentEncryptionKey(),
+    iv
+  );
+
+  const encryptedData = Buffer.concat([
+    cipher.update(fileBuffer),
+    cipher.final()
+  ]);
+
+  return {
+    encryptedData,
+    iv,
+    authTag: cipher.getAuthTag()
+  };
+}
 app.put("/api/member/profile", requireAuth, async (req, res) => {
   try {
     const firstName = cleanText(req.body.firstName, 80);
