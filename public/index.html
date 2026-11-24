@@ -1,103 +1,289 @@
+
 <!doctype html>
 <html lang="fr">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#101d32">
 <title>WIN CASH — Espace membre</title>
 <style>
-:root{font-family:Inter,system-ui,Arial,sans-serif;color:#172033;background:#f3f5f8}
-*{box-sizing:border-box}body{margin:0;min-height:100vh}.top{background:#101d32;color:white;padding:22px 18px}
-.wrap{max-width:520px;margin:30px auto;padding:0 16px}.brand{font-size:25px;font-weight:800;letter-spacing:1px}.sub{opacity:.8;margin-top:5px}
-.card{background:white;border:1px solid #e3e8ef;border-radius:18px;padding:22px;box-shadow:0 8px 28px #14243a0d}
-.tabs{display:flex;gap:8px;margin-bottom:20px}.tabs button{flex:1;background:#eef2f7;color:#26364d}
-button{border:0;border-radius:10px;padding:13px 16px;background:#dcae49;color:#101d32;font-weight:700;font-size:15px;cursor:pointer}
-button.secondary{background:#eef2f7;color:#26364d}button:disabled{opacity:.5}
-label{display:block;font-weight:650;font-size:14px;margin:13px 0 6px}
-input{width:100%;padding:13px;border:1px solid #cbd5e1;border-radius:9px;font:inherit}
-form button{width:100%;margin-top:18px}.muted{color:#64748b;font-size:13px;line-height:1.5}
-.error{color:#b42318;margin-top:12px}.success{color:#147d46;margin-top:12px}
-.hidden{display:none}.profile{display:grid;gap:10px}.pill{display:inline-block;background:#edf7f0;color:#17663b;padding:5px 9px;border-radius:30px;font-size:12px;font-weight:700}
-footer{text-align:center;color:#64748b;font-size:12px;margin:20px 0}
+:root{font-family:Arial,sans-serif;color:#172033;background:#f3f5f8}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh}
+.top{background:#101d32;color:white;padding:20px}
+.brand{font-size:26px;font-weight:800}
+.wrap{max-width:1050px;margin:25px auto;padding:0 15px}
+.card{background:white;border:1px solid #e3e8ef;border-radius:16px;padding:20px;margin-bottom:15px}
+button{border:0;border-radius:9px;padding:12px 15px;background:#dcae49;color:#101d32;font-weight:bold;cursor:pointer}
+button.secondary{background:#eef2f7;color:#26364d}
+input,select{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:9px;font:inherit}
+label{display:block;margin:13px 0 6px;font-weight:bold}
+form button{width:100%;margin-top:18px}
+.hidden{display:none!important}
+.muted{color:#64748b;font-size:13px;line-height:1.5}
+.error{color:#b42318;margin-top:12px}
+.tabs{display:flex;gap:8px;margin-bottom:18px}
+.tabs button{flex:1}
+.auth{max-width:520px;margin:30px auto}
+.layout{display:grid;grid-template-columns:230px 1fr;gap:16px}
+.menu{display:grid;gap:7px}
+.menu button{text-align:left;background:#f1f3f6;color:#26364d}
+.menu button.active{background:#101d32;color:white}
+.info{background:#f7f9fc;padding:13px;border-radius:9px;margin:8px 0}
+.notice{background:#fff7e6;padding:14px;border-radius:9px;color:#75551c;font-size:13px;line-height:1.5;margin:15px 0}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+footer{text-align:center;color:#64748b;font-size:12px;margin:25px}
+@media(max-width:700px){
+.layout{grid-template-columns:1fr}
+.menu{grid-template-columns:1fr 1fr}
+.menu button{text-align:center;font-size:12px;padding:10px 5px}
+.grid{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
-<header class="top"><div class="brand">WIN CASH</div><div class="sub">Ton espace membre sécurisé</div></header>
+<header class="top">
+<div class="brand">WIN CASH</div>
+<div>Ton espace membre sécurisé</div>
+</header>
+
 <main class="wrap">
-<section id="auth" class="card">
-  <div class="tabs">
-    <button id="showLogin" type="button" class="secondary">Connexion</button>
-    <button id="showRegister" type="button">Inscription</button>
-  </div>
-  <form id="registerForm" class="hidden">
-    <label for="firstName">Prénom</label><input id="firstName" autocomplete="given-name" required maxlength="80">
-    <label for="lastName">Nom</label><input id="lastName" autocomplete="family-name" required maxlength="80">
-    <label for="regEmail">Adresse e-mail</label><input id="regEmail" type="email" autocomplete="email" required>
-    <label for="phone">Téléphone</label><input id="phone" type="tel" autocomplete="tel" required maxlength="30">
-  <label for="referralCode">Code de parrainage (facultatif)</label>
-<input id="referralCode" maxlength="30" placeholder="Code de votre parrain">  <label for="regPassword">Mot de passe (10 caractères minimum)</label><input id="regPassword" type="password" autocomplete="new-password" minlength="10" required>
-    <button type="submit">Créer mon compte</button>
-  </form>
-  <form id="loginForm">
-    <label for="loginEmail">Adresse e-mail</label><input id="loginEmail" type="email" autocomplete="email" required>
-    <label for="loginPassword">Mot de passe</label><input id="loginPassword" type="password" autocomplete="current-password" required>
-    <button type="submit">Se connecter</button>
-  </form>
-  <div id="message" role="status" aria-live="polite"></div>
-  <p class="muted">Les comptes sont enregistrés sur le serveur WIN CASH. Les dépôts, retraits et paris en argent réel ne sont pas activés dans cette version.</p>
+<section id="auth" class="card auth">
+<div class="tabs">
+<button id="showLogin" class="secondary" type="button">Connexion</button>
+<button id="showRegister" type="button">Inscription</button>
+</div>
+
+<form id="registerForm" class="hidden">
+<label>Prénom</label><input id="firstName" required maxlength="80">
+<label>Nom</label><input id="lastName" required maxlength="80">
+<label>Adresse e-mail</label><input id="regEmail" type="email" required>
+<label>Téléphone</label><input id="phone" required maxlength="30">
+<label>Code de parrainage (facultatif)</label>
+<input id="referralCode" maxlength="30">
+<label>Mot de passe (10 caractères minimum)</label>
+<input id="regPassword" type="password" minlength="10" required>
+<button type="submit">Créer mon compte</button>
+</form>
+
+<form id="loginForm">
+<label>Adresse e-mail</label><input id="loginEmail" type="email" required>
+<label>Mot de passe</label><input id="loginPassword" type="password" required>
+<button type="submit">Se connecter</button>
+</form>
+<div id="message" role="status"></div>
+<p class="muted">Bienvenue sur la plateforme WIN CASH.</p>
 </section>
-<section id="dashboard" class="card hidden">
-  <span class="pill">Compte membre</span>
-  <h2>Bienvenue sur WIN CASH</h2>
-  <div id="profile" class="profile"></div>
-  <p class="muted">Ton compte est créé. Les services financiers et les paris seront ajoutés après les intégrations et validations nécessaires.</p>
-  <button id="logout" class="secondary" type="button">Se déconnecter</button>
+
+<section id="dashboard" class="hidden">
+<div class="layout">
+<aside class="card">
+<strong>ESPACE MEMBRE</strong>
+<h3 id="welcomeName">Bienvenue</h3>
+<nav class="menu">
+<button class="active" data-page="overview">Vue générale</button>
+<button data-page="history">Historique</button>
+<button data-page="profile">Mon profil</button>
+<button data-page="deposit">Dépôt</button>
+<button data-page="withdraw">Retrait</button>
+<button data-page="referral">Mon code parrainage</button>
+<button data-page="loan">Demande de prêt</button>
+</nav>
+<br>
+<button id="logout" class="secondary" type="button">Se déconnecter</button>
+</aside>
+
+<section class="card">
+<div id="page-overview">
+<h2>Bienvenue sur WIN CASH</h2>
+<p class="muted">Voici ton espace personnel.</p>
+<div id="overviewInfo"></div>
+<div class="notice">Les opérations financières ne sont pas encore activées.</div>
+</div>
+
+<div id="page-history" class="hidden">
+<h2>Historique</h2>
+<p class="muted">Retrouve ici le suivi de tes opérations et demandes.</p>
+<div class="notice">L'historique sera disponible lorsque les opérations seront activées.</div>
+</div>
+
+<div id="page-profile" class="hidden">
+<h2>Mon profil</h2>
+<div id="profileInfo"></div>
+<div class="notice">
+La modification du profil et l'envoi des documents seront activés avec un système sécurisé. Les documents seront privés et accessibles uniquement aux administrateurs autorisés.
+</div>
+<h3>Documents acceptés</h3>
+<div class="grid">
+<div class="info">Carte nationale d'identité</div>
+<div class="info">Passeport</div>
+<div class="info">Permis de conduire</div>
+<div class="info">Carte d'électeur</div>
+<div class="info">Carte biométrique</div>
+<div class="info">Carte d'étudiant</div>
+<div class="info">Carte scolaire</div>
+</div>
+<p class="muted">Les cartes scolaires et étudiantes pourront servir de justificatifs complémentaires.</p>
+<p><strong>Statut du dossier :</strong> En attente de mise en service</p>
+</div>
+
+<div id="page-deposit" class="hidden">
+<h2>Dépôt</h2>
+<div class="notice">Les dépôts sont temporairement indisponibles. N'envoie aucun paiement avant l'activation du moyen officiel de paiement WIN CASH.</div>
+</div>
+
+<div id="page-withdraw" class="hidden">
+<h2>Retrait</h2>
+<div class="notice">Les retraits ne sont pas encore activés. Ils seront disponibles après la mise en place d'un système sécurisé.</div>
+</div>
+
+<div id="page-referral" class="hidden">
+<h2>Mon code parrainage</h2>
+<div class="info"><strong id="myReferralCode">Non disponible</strong></div>
+<button id="copyReferral" type="button">Copier mon code</button>
+<p id="referralMessage" class="muted"></p>
+</div>
+
+<div id="page-loan" class="hidden">
+<h2>Demande de prêt</h2>
+<div class="notice">Le formulaire sera activé après définition des conditions et modalités de traitement des demandes.</div>
+</div>
 </section>
-<footer>WIN CASH · Espace membre</footer>
+</div>
+</section>
+<footer>WIN CASH · Espace membre sécurisé</footer>
 </main>
+
 <script>
-const $ = id => document.getElementById(id);
-const message = (text, type="error") => { $("message").className=type; $("message").textContent=text; };
-async function api(url, options={}) {
-  const response = await fetch(url,{...options,headers:{"Content-Type":"application/json",...(options.headers||{})},credentials:"same-origin"});
-  const data = await response.json().catch(()=>({error:"Réponse invalide du serveur."}));
-  if(!response.ok) throw new Error(data.error || "Une erreur est survenue.");
-  return data;
+const $=id=>document.getElementById(id);
+let currentUser=null;
+
+async function api(url,options={}){
+const response=await fetch(url,{
+...options,
+headers:{"Content-Type":"application/json",...(options.headers||{})},
+credentials:"same-origin"
+});
+const data=await response.json().catch(()=>({error:"Réponse invalide du serveur."}));
+if(!response.ok)throw new Error(data.error||"Une erreur est survenue.");
+return data;
 }
+
 function show(mode){
-  $("loginForm").classList.toggle("hidden",mode!=="login");
-  $("registerForm").classList.toggle("hidden",mode!=="register");
-  $("showLogin").className=mode==="login"?"":"secondary";
-  $("showRegister").className=mode==="register"?"":"secondary";
-  $("message").textContent="";
+$("loginForm").classList.toggle("hidden",mode!=="login");
+$("registerForm").classList.toggle("hidden",mode!=="register");
+$("showLogin").className=mode==="login"?"":"secondary";
+$("showRegister").className=mode==="register"?"":"secondary";
+$("message").textContent="";
 }
+
+function addInfo(container,label,value){
+const p=document.createElement("div");
+p.className="info";
+const b=document.createElement("strong");
+b.textContent=label+" : ";
+p.append(b,document.createTextNode(value||"Non renseigné"));
+container.appendChild(p);
+}
+
 function render(user){
-  $("auth").classList.add("hidden"); $("dashboard").classList.remove("hidden");
-  $("profile").replaceChildren();
-  [["Nom",user.lastName],["Prénom",user.firstName],["E-mail",user.email],["Téléphone",user.phone],["Type de compte",user.role==="admin"?"Administrateur":"Membre"]].forEach(([k,v])=>{
-    const p=document.createElement("p"); p.textContent=k+" : "+v; $("profile").appendChild(p);
-  });
+currentUser=user;
+$("auth").classList.add("hidden");
+$("dashboard").classList.remove("hidden");
+$("welcomeName").textContent="Bonjour, "+(user.firstName||"membre");
+$("overviewInfo").replaceChildren();
+$("profileInfo").replaceChildren();
+
+addInfo($("overviewInfo"),"Nom",user.lastName);
+addInfo($("overviewInfo"),"Prénom",user.firstName);
+addInfo($("overviewInfo"),"E-mail",user.email);
+addInfo($("overviewInfo"),"Téléphone",user.phone);
+
+addInfo($("profileInfo"),"Prénom",user.firstName);
+addInfo($("profileInfo"),"Nom",user.lastName);
+addInfo($("profileInfo"),"E-mail",user.email);
+addInfo($("profileInfo"),"Téléphone",user.phone);
+addInfo($("profileInfo"),"Type de compte",user.role==="admin"?"Administrateur":"Membre");
+
+$("myReferralCode").textContent=user.referralCode||"Non disponible";
 }
-$("showLogin").onclick=()=>show("login"); $("showRegister").onclick=()=>show("register");
+
+function openPage(name){
+document.querySelectorAll("[id^='page-']").forEach(el=>el.classList.add("hidden"));
+$("page-"+name).classList.remove("hidden");
+document.querySelectorAll(".menu button").forEach(btn=>{
+btn.classList.toggle("active",btn.dataset.page===name);
+});
+}
+
+document.querySelectorAll(".menu button").forEach(btn=>{
+btn.onclick=()=>openPage(btn.dataset.page);
+});
+
+$("showLogin").onclick=()=>show("login");
+$("showRegister").onclick=()=>show("register");
+
 $("registerForm").onsubmit=async e=>{
-  e.preventDefault(); message("Création du compte en cours…","success");
-  try{
-    const data=await api("/api/auth/register",{method:"POST",body:JSON.stringify({
-      firstName:$("firstName").value,lastName:$("lastName").value,email:$("regEmail").value,
-      phone:$("phone").value,
+e.preventDefault();
+$("message").textContent="Création du compte en cours...";
+try{
+const data=await api("/api/auth/register",{
+method:"POST",
+body:JSON.stringify({
+firstName:$("firstName").value,
+lastName:$("lastName").value,
+email:$("regEmail").value,
+phone:$("phone").value,
 referralCode:$("referralCode").value,
 password:$("regPassword").value
-    })}); render(data.user);
-  }catch(err){message(err.message);}
+})
+});
+render(data.user);
+}catch(err){$("message").textContent=err.message;}
 };
+
 $("loginForm").onsubmit=async e=>{
-  e.preventDefault(); message("Connexion en cours…","success");
-  try{const data=await api("/api/auth/login",{method:"POST",body:JSON.stringify({email:$("loginEmail").value,password:$("loginPassword").value})});render(data.user);}
-  catch(err){message(err.message);}
+e.preventDefault();
+$("message").textContent="Connexion en cours...";
+try{
+const data=await api("/api/auth/login",{
+method:"POST",
+body:JSON.stringify({
+email:$("loginEmail").value,
+password:$("loginPassword").value
+})
+});
+render(data.user);
+}catch(err){$("message").textContent=err.message;}
 };
+
+$("copyReferral").onclick=async()=>{
+const code=currentUser&&currentUser.referralCode;
+if(!code){$("referralMessage").textContent="Aucun code disponible.";return;}
+try{
+await navigator.clipboard.writeText(code);
+$("referralMessage").textContent="Code copié.";
+}catch{
+$("referralMessage").textContent="Copie impossible sur cet appareil. Sélectionne le code pour le copier.";
+}
+};
+
 $("logout").onclick=async()=>{
-  try{await api("/api/auth/logout",{method:"POST",body:"{}"});$("dashboard").classList.add("hidden");$("auth").classList.remove("hidden");show("login");}
-  catch(err){message(err.message);}
+try{
+await api("/api/auth/logout",{method:"POST",body:"{}"});
+currentUser=null;
+$("dashboard").classList.add("hidden");
+$("auth").classList.remove("hidden");
+show("login");
+}catch(err){alert(err.message);}
 };
-(async()=>{try{const data=await api("/api/auth/me");render(data.user);}catch{} })();
+
+(async()=>{
+try{
+const data=await api("/api/auth/me");
+render(data.user);
+}catch{}
+})();
 </script>
-</body></html>
+</body>
+</html>
