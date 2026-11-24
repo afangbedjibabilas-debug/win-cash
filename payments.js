@@ -1,7 +1,6 @@
 
-const crypto = require("crypto");
-
 const SASPAY_BASE_URL = "https://api.saspay.me/api/v1";
+
 const ACTIVATION_AMOUNT = 3000;
 const ACTIVATION_CURRENCY = "XOF";
 const ACTIVATION_COUNTRY = "TG";
@@ -30,11 +29,24 @@ async function sasPayRequest(endpoint, options = {}) {
   const data = await response.json().catch(() => ({}));
 
   if (!response.ok) {
-    console.error("SasPay API error:", response.status, data.code || "");
+    console.error("SASPAY API error:", response.status);
     throw new Error("Le prestataire de paiement a refusé la demande.");
   }
 
   return data;
+}
+
+function isValidCheckoutUrl(value) {
+  try {
+    const url = new URL(value);
+
+    return (
+      url.protocol === "https:" &&
+      url.hostname === "pay.saspay.me"
+    );
+  } catch {
+    return false;
+  }
 }
 
 async function ensurePaymentSchema(pool) {
@@ -74,14 +86,6 @@ async function activateMember(pool, userId, paymentId) {
       return;
     }
 
-    await client.query(
-      `UPDATE activation_payments
-       SET status = 'paid',
-           confirmed_at = NOW()
-       WHERE id = $1`,
-      [payment.id]
-    );
-
     const userResult = await client.query(
       `UPDATE users
        SET activation_status = 'active',
@@ -95,6 +99,14 @@ async function activateMember(pool, userId, paymentId) {
     if (!userResult.rows[0]) {
       throw new Error("Membre introuvable.");
     }
+
+    await client.query(
+      `UPDATE activation_payments
+       SET status = 'paid',
+           confirmed_at = NOW()
+       WHERE id = $1`,
+      [payment.id]
+    );
 
     const referrerId = userResult.rows[0].referred_by;
 
@@ -118,55 +130,73 @@ async function activateMember(pool, userId, paymentId) {
 }
 
 module.exports = function installPayments(app, pool, requireAuth) {
+
   app.post(
     "/api/payments/activation",
     requireAuth,
     async (req, res) => {
+      let client;
+
       try {
         await ensurePaymentSchema(pool);
 
-        const userResult = await pool.query(
+        client = await pool.connect();
+        await client.query("BEGIN");
+
+        // Verrouille le compte pour éviter plusieurs paiements simultanés.
+        const userResult = await client.query(
           `SELECT id, first_name, last_name, email, activation_status
            FROM users
-           WHERE id = $1`,
+           WHERE id = $1
+           FOR UPDATE`,
           [req.session.userId]
         );
 
         const user = userResult.rows[0];
 
         if (!user) {
+          await client.query("ROLLBACK");
           return res.status(404).json({
             error: "Compte introuvable."
           });
         }
 
         if (user.activation_status === "active") {
+          await client.query("ROLLBACK");
           return res.status(409).json({
             error: "Ton compte est déjà activé."
           });
         }
 
-        const existing = await pool.query(
+        const existingResult = await client.query(
           `SELECT provider_reference, checkout_url, status
            FROM activation_payments
-           WHERE user_id = $1`,
+           WHERE user_id = $1
+           FOR UPDATE`,
           [user.id]
         );
 
-        const previousPayment = existing.rows[0];
+        const previousPayment = existingResult.rows[0];
 
-        if (previousPayment && previousPayment.status === "pending") {
-          if (previousPayment.checkout_url) {
-            return res.json({
-              ok: true,
-              checkoutUrl: previousPayment.checkout_url,
-              paymentId: previousPayment.provider_reference,
-              message: "Reprends ton paiement en attente."
-            });
-          }
-
+        if (previousPayment && previousPayment.status === "paid") {
+          await client.query("ROLLBACK");
           return res.status(409).json({
-            error: "Une demande de paiement est déjà en cours. Réessaie dans quelques instants."
+            error: "Ce compte possède déjà un paiement confirmé."
+          });
+        }
+
+        if (
+          previousPayment &&
+          previousPayment.status === "pending" &&
+          previousPayment.checkout_url
+        ) {
+          await client.query("COMMIT");
+
+          return res.json({
+            ok: true,
+            checkoutUrl: previousPayment.checkout_url,
+            paymentId: previousPayment.provider_reference,
+            message: "Reprends ton paiement en attente."
           });
         }
 
@@ -190,15 +220,19 @@ module.exports = function installPayments(app, pool, requireAuth) {
         if (
           !checkout.id ||
           !checkout.checkout_url ||
-          !checkout.checkout_url.startsWith("https://pay.saspay.me/")
+          Number(checkout.amount) !== ACTIVATION_AMOUNT ||
+          checkout.currency !== ACTIVATION_CURRENCY ||
+          !isValidCheckoutUrl(checkout.checkout_url)
         ) {
-          console.error("Unexpected SasPay checkout response.");
+          console.error("Réponse de création SASPAY invalide.");
+          await client.query("ROLLBACK");
+
           return res.status(502).json({
-            error: "Réponse de paiement invalide."
+            error: "Réponse de paiement invalide. Aucun compte n'a été activé."
           });
         }
 
-        await pool.query(
+        await client.query(
           `INSERT INTO activation_payments
            (user_id, amount, provider_reference, status, checkout_url)
            VALUES ($1, $2, $3, 'pending', $4)
@@ -217,16 +251,26 @@ module.exports = function installPayments(app, pool, requireAuth) {
           ]
         );
 
-        res.status(201).json({
+        await client.query("COMMIT");
+
+        return res.status(201).json({
           ok: true,
           checkoutUrl: checkout.checkout_url,
           paymentId: checkout.id
         });
+
       } catch (error) {
+        if (client) {
+          await client.query("ROLLBACK").catch(() => {});
+        }
+
         console.error("Activation payment error:", error.message);
-        res.status(500).json({
+
+        return res.status(500).json({
           error: "Impossible de démarrer le paiement. Réessaie plus tard."
         });
+      } finally {
+        if (client) client.release();
       }
     }
   );
@@ -254,6 +298,12 @@ module.exports = function installPayments(app, pool, requireAuth) {
           });
         }
 
+        if (Number(payment.amount) !== ACTIVATION_AMOUNT) {
+          return res.status(400).json({
+            error: "Montant du paiement incorrect."
+          });
+        }
+
         if (payment.status === "paid") {
           return res.json({
             ok: true,
@@ -267,9 +317,7 @@ module.exports = function installPayments(app, pool, requireAuth) {
           { method: "GET" }
         );
 
-        if (
-          result.id !== payment.provider_reference
-        ) {
+        if (result.id !== payment.provider_reference) {
           return res.status(502).json({
             error: "Identifiant de paiement non reconnu."
           });
@@ -305,14 +353,16 @@ module.exports = function installPayments(app, pool, requireAuth) {
           );
         }
 
-        res.json({
+        return res.json({
           ok: true,
           status: result.status || "PENDING",
           activated: false
         });
+
       } catch (error) {
         console.error("Payment status error:", error.message);
-        res.status(500).json({
+
+        return res.status(500).json({
           error: "Impossible de vérifier le paiement pour le moment."
         });
       }
