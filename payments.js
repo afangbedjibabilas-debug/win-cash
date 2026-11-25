@@ -1,8 +1,11 @@
 
-const SASPAY_BASE_URL = "https://api.saspay.me/api/v1";
-const ACTIVATION_AMOUNT = 3000;
-const ACTIVATION_CURRENCY = "XOF";
-
+const ACTIVATION_PRICES = {
+  XOF: 3000,
+  XAF: 3000,
+  NGN: 6802,
+  GHS: 59.45,
+  GNF: 44517
+};
 function getSasPayKey() {
   const key = process.env.SASPAY_SECRET_KEY || "";
 
@@ -53,13 +56,15 @@ if (!response.ok || body.success === false) {
 }
 
 return data;
-  return body.data || {};
+  
 }
 
 async function ensurePaymentSchema(pool) {
   await pool.query(`
     ALTER TABLE activation_payments
-    ADD COLUMN IF NOT EXISTS checkout_url TEXT
+    ADD COLUMN IF NOT EXISTS checkout_url TEXT,
+    ADD COLUMN IF NOT EXISTS country_code VARCHAR(2),
+    ADD COLUMN IF NOT EXISTS currency VARCHAR(3)
   `);
 }
 
@@ -84,10 +89,14 @@ async function activateMember(pool, userId, paymentId) {
       throw new Error("Paiement introuvable.");
     }
 
-    if (Number(payment.amount) !== ACTIVATION_AMOUNT) {
-      throw new Error("Montant du paiement incorrect.");
-    }
+    const expectedAmount = ACTIVATION_PRICES[payment.currency];
 
+if (
+  !expectedAmount ||
+  Number(payment.amount) !== expectedAmount
+) {
+  throw new Error("Montant ou devise du paiement incorrect.");
+}
     if (payment.status === "paid") {
       await client.query("COMMIT");
       return;
@@ -191,7 +200,41 @@ module.exports = function installPayments(app, pool, requireAuth) {
             error: "Ton compte est déjà activé."
           });
         }
+const countryCode = String(req.body.country || "").toUpperCase();
 
+if (!/^[A-Z]{2}$/.test(countryCode)) {
+  return res.status(400).json({
+    error: "Veuillez choisir un pays valide."
+  });
+}
+
+const countriesResult = await sasPayRequest(
+  "/countries/",
+  { method: "GET" }
+);
+
+const countries = Array.isArray(countriesResult)
+  ? countriesResult
+  : countriesResult.countries || [];
+
+const selectedCountry = countries.find(
+  country => country.iso_code === countryCode
+);
+
+if (!selectedCountry || selectedCountry.is_active !== true) {
+  return res.status(400).json({
+    error: "Ce pays n'est pas disponible pour le paiement."
+  });
+}
+
+const currency = selectedCountry.default_currency;
+const amount = ACTIVATION_PRICES[currency];
+
+if (!amount) {
+  return res.status(400).json({
+    error: "La devise de ce pays n'est pas encore prise en charge."
+  });
+                                      }
         const existing = await pool.query(
           `SELECT provider_reference, checkout_url, status
            FROM activation_payments
@@ -217,13 +260,14 @@ module.exports = function installPayments(app, pool, requireAuth) {
         }
 
         const payload = {
-          amount: "3000.00",
-          currency: ACTIVATION_CURRENCY,
-          description: "Activation du compte WIN CASH",
-          customer_email: user.email,
-          customer_name: `${user.first_name} ${user.last_name}`,
-          return_url: "https://win-cash-production-d2c6ee74.up.railway.app/"
-        };
+  amount: Number(amount).toFixed(2),
+  currency: currency,
+  country: countryCode,
+  description: "Activation du compte WIN CASH",
+  customer_email: user.email,
+  customer_name: `${user.first_name} ${user.last_name}`,
+  return_url: "https://win-cash-production-d2c6ee74.up.railway.app/"
+};
 
         const checkout = await sasPayRequest(
           "/checkout-sessions/",
@@ -263,18 +307,20 @@ console.log("SASPAY checkout host:", checkoutHost);
         }
 
         await pool.query(
-          `INSERT INTO activation_payments
-           (user_id, amount, provider_reference, status, checkout_url)
-           VALUES ($1, $2, $3, 'pending', $4)
-           ON CONFLICT (user_id)
-           DO UPDATE SET
-             amount = EXCLUDED.amount,
-             provider_reference = EXCLUDED.provider_reference,
-             status = 'pending',
-             checkout_url = EXCLUDED.checkout_url,
-             confirmed_at = NULL`,
-          [user.id, ACTIVATION_AMOUNT, paymentId, checkoutUrl]
-        );
+  `INSERT INTO activation_payments
+   (user_id, amount, provider_reference, status, checkout_url, country_code, currency)
+   VALUES ($1, $2, $3, 'pending', $4, $5, $6)
+   ON CONFLICT (user_id)
+   DO UPDATE SET
+     amount = EXCLUDED.amount,
+     provider_reference = EXCLUDED.provider_reference,
+     status = 'pending',
+     checkout_url = EXCLUDED.checkout_url,
+     country_code = EXCLUDED.country_code,
+     currency = EXCLUDED.currency,
+     confirmed_at = NULL`,
+  [user.id, amount, paymentId, checkoutUrl, countryCode, currency]
+);
 
         return res.status(201).json({
           ok: true,
