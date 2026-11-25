@@ -527,72 +527,172 @@ document.querySelectorAll(".menu button").forEach(btn=>{
 
 $("showLogin").onclick=()=>show("login");
 $("showRegister").onclick=()=>show("register");
+
 let currentPaymentId = sessionStorage.getItem("wincash_activation_payment_id") || "";
 
-$("startActivation").onclick=async()=>{
-  const button=$("startActivation");
-  button.disabled=true;
-  $("activationMessage").textContent="Préparation du paiement...";
-  try{
-    const data=await api("/api/payments/activation",{
-      method:"POST",
-      body:"{}"
-    });
-
-    if(!data.checkoutUrl || !data.paymentId){
-      throw new Error("Lien de paiement invalide.");
-    }
-
-    currentPaymentId=data.paymentId;
-    sessionStorage.setItem("wincash_activation_payment_id",currentPaymentId);
-    window.location.href=data.checkoutUrl;
-
-  }catch(err){
-    $("activationMessage").textContent=err.message;
-    button.disabled=false;
-  }
+const ACTIVATION_PRICES = {
+  XOF: 3000,
+  XAF: 3000,
+  NGN: 6802,
+  GHS: 59.45,
+  GNF: 44517
 };
 
-$("verifyActivation").onclick=async()=>{
-  const button=$("verifyActivation");
-  button.disabled=true;
-  $("activationMessage").textContent="Vérification auprès de SASPAY...";
+async function loadActivationCountries() {
+  const select = $("activationCountry");
+  const price = $("activationPrice");
 
-  try{
-    if(!currentPaymentId){
-      const pending=await api("/api/payments/activation",{
-        method:"POST",
-        body:"{}"
+  select.innerHTML = '<option value="">Chargement...</option>';
+
+  try {
+    const data = await api("/api/payments/countries");
+    const countries = data.countries || [];
+
+    select.innerHTML = '<option value="">Choisissez votre pays</option>';
+
+    countries
+      .filter(country => country.is_active === true)
+      .forEach(country => {
+        const currency = country.default_currency;
+        const amount = ACTIVATION_PRICES[currency];
+
+        if (!amount) return;
+
+        const option = document.createElement("option");
+        option.value = country.iso_code;
+        option.textContent =
+          (country.name || country.country_name || country.iso_code) +
+          " — " + currency;
+
+        select.appendChild(option);
       });
 
-      if(pending.checkoutUrl && pending.paymentId){
-        currentPaymentId=pending.paymentId;
-        sessionStorage.setItem("wincash_activation_payment_id",currentPaymentId);
-        $("activationMessage").textContent="Reprise du paiement en attente...";
-        window.location.href=pending.checkoutUrl;
+    select.onchange = () => {
+      const country = countries.find(
+        item => item.iso_code === select.value
+      );
+
+      if (!country) {
+        price.textContent = "Choisissez votre pays";
         return;
       }
 
-      throw new Error("Aucun paiement en attente.");
+      const currency = country.default_currency;
+      const amount = ACTIVATION_PRICES[currency];
+
+      price.textContent =
+        amount.toLocaleString("fr-FR") + " " + currency;
+    };
+
+  } catch (error) {
+    select.innerHTML =
+      '<option value="">Impossible de charger les pays</option>';
+    $("activationMessage").textContent = error.message;
+  }
+}
+
+$("startActivation").onclick = async () => {
+  const button = $("startActivation");
+  const country = $("activationCountry").value;
+
+  if (!country) {
+    $("activationMessage").textContent =
+      "Veuillez sélectionner votre pays avant de continuer.";
+    return;
+  }
+
+  button.disabled = true;
+  $("activationMessage").textContent = "Préparation du paiement...";
+
+  try {
+    const data = await api("/api/payments/activation", {
+      method: "POST",
+      body: JSON.stringify({ country })
+    });
+
+    if (!data.checkoutUrl || !data.paymentId) {
+      throw new Error("Lien de paiement invalide.");
     }
 
-    const result=await api(
-      "/api/payments/activation/"+encodeURIComponent(currentPaymentId)+"/status"
+    currentPaymentId = data.paymentId;
+
+    sessionStorage.setItem(
+      "wincash_activation_payment_id",
+      currentPaymentId
     );
 
-    if(result.activated){
+    window.location.href = data.checkoutUrl;
+
+  } catch (err) {
+    $("activationMessage").textContent = err.message;
+    button.disabled = false;
+  }
+};
+
+$("verifyActivation").onclick = async () => {
+  const button = $("verifyActivation");
+
+  if (!currentPaymentId) {
+    $("activationMessage").textContent =
+      "Aucun paiement à vérifier. Veuillez commencer votre paiement.";
+    return;
+  }
+
+  button.disabled = true;
+  $("activationMessage").textContent =
+    "Vérification auprès de SASPAY...";
+
+  try {
+    const result = await api(
+      "/api/payments/activation/" +
+      encodeURIComponent(currentPaymentId) +
+      "/status"
+    );
+
+    if (result.activated) {
       sessionStorage.removeItem("wincash_activation_payment_id");
-      $("activationMessage").textContent="Paiement confirmé !";
-      const me=await api("/api/auth/me");
+      currentPaymentId = "";
+
+      $("activationMessage").textContent = "Paiement confirmé !";
+
+      const me = await api("/api/auth/me");
       render(me.user);
-    }else{
-      $("activationMessage").textContent=
-        "Paiement non encore confirmé. Statut : "+(result.status||"EN ATTENTE");
+
+    } else {
+      $("activationMessage").textContent =
+        "Paiement non encore confirmé. Statut : " +
+        (result.status || "EN ATTENTE");
     }
 
-  }catch(err){
-    $("activationMessage").textContent=err.message;
-  }finally{
+  } catch (err) {
+    $("activationMessage").textContent = err.message;
+
+  } finally {
+    button.disabled = false;
+  }
+};
+
+$("activationLogout").onclick = async () => {
+  try {
+    await api("/api/auth/logout", {
+      method: "POST",
+      body: "{}"
+    });
+
+    currentUser = null;
+    sessionStorage.removeItem("wincash_activation_payment_id");
+
+    $("activation").classList.add("hidden");
+    $("dashboard").classList.add("hidden");
+    $("auth").classList.remove("hidden");
+
+    show("login");
+
+  } catch (err) {
+    alert(err.message);
+  }
+};
+
     button.disabled=false;
   }
 };
