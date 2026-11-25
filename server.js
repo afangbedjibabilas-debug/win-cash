@@ -380,12 +380,15 @@ app.post("/api/auth/register", authLimiter, async (req, res) => {
     const passwordHash = await hashPassword(password, salt);
 
     const result = await pool.query(
-      `INSERT INTO users
-       (first_name,last_name,email,phone,password_hash,password_salt,
-        referral_code,referred_by)
-       VALUES
-       ($1,$2,$3,$4,$5,$6,$7,
-        (SELECT id FROM users WHERE referral_code = $8))
+      
+       `INSERT INTO users
+        (first_name,last_name,email,phone,password_hash,password_salt,
+         referral_code,referred_by,activation_status)
+        VALUES
+        ($1,$2,$3,$4,$5,$6,$7,
+         (SELECT id FROM users WHERE referral_code = $8),
+         'pending')
+
        RETURNING id,first_name,last_name,email,phone,role,created_at,
                  referral_code,activation_status,activated_at`,
       [
