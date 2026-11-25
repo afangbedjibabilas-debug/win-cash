@@ -137,7 +137,34 @@ async function activateMember(pool, userId, paymentId) {
 }
 
 module.exports = function installPayments(app, pool, requireAuth) {
-  app.post(
+   app.get(
+    "/api/payments/countries",
+    requireAuth,
+    async (req, res) => {
+      try {
+        const result = await sasPayRequest(
+          "/countries/",
+          { method: "GET" }
+        );
+
+        const countries = Array.isArray(result)
+          ? result
+          : result.countries || [];
+
+        return res.json({
+          ok: true,
+          countries
+        });
+
+      } catch (error) {
+        console.error("SASPAY countries error:", error.message);
+
+        return res.status(502).json({
+          error: "Impossible de récupérer les pays disponibles."
+        });
+      }
+    }
+  ); app.post(
     "/api/payments/activation",
     requireAuth,
     async (req, res) => {
