@@ -482,6 +482,7 @@ function render(user){
   if(user.role!=="admin" && user.activationStatus!=="active"){
     $("dashboard").classList.add("hidden");
     $("activation").classList.remove("hidden");
+  loadActivationCountries();
     $("activationMessage").textContent=
       "Votre compte est en attente d'activation. Effectuez le paiement unique de 3 000 FCFA.";
     return;
