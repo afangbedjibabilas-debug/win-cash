@@ -254,7 +254,6 @@ async function initializeDatabase() {
     ADD COLUMN IF NOT EXISTS referral_code VARCHAR(30);
 
     ALTER TABLE users
-    ADD COLUMN IF NOT EXISTS referred_by BIGINT REFERENCES users(id);
 
     ALTER TABLE users
     ADD COLUMN IF NOT EXISTS activation_status VARCHAR(20)
@@ -314,6 +313,39 @@ async function initializeDatabase() {
       status VARCHAR(20) NOT NULL DEFAULT 'pending',
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
+CREATE TABLE IF NOT EXISTS wallets (
+  id BIGSERIAL PRIMARY KEY,
+  user_id BIGINT NOT NULL UNIQUE REFERENCES users(id),
+  balance_xof BIGINT NOT NULL DEFAULT 0 CHECK (balance_xof >= 0),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS deposits (
+  id BIGSERIAL PRIMARY KEY,
+  user_id BIGINT NOT NULL REFERENCES users(id),
+  country_code VARCHAR(10) NOT NULL,
+  currency VARCHAR(10) NOT NULL,
+  local_amount NUMERIC(20,2) NOT NULL,
+  exchange_rate NUMERIC(20,10) NOT NULL,
+  amount_xof BIGINT NOT NULL CHECK (amount_xof >= 3000),
+  provider_reference VARCHAR(150) UNIQUE,
+  checkout_url TEXT,
+  status VARCHAR(20) NOT NULL DEFAULT 'pending'
+    CHECK (status IN ('pending', 'paid', 'failed', 'cancelled')),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  confirmed_at TIMESTAMPTZ
+);
+
+CREATE TABLE IF NOT EXISTS wallet_transactions (
+  id BIGSERIAL PRIMARY KEY,
+  user_id BIGINT NOT NULL REFERENCES users(id),
+  deposit_id BIGINT NOT NULL UNIQUE REFERENCES deposits(id),
+  type VARCHAR(20) NOT NULL DEFAULT 'deposit',
+  amount_xof BIGINT NOT NULL CHECK (amount_xof > 0),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
   `);
 }
 
