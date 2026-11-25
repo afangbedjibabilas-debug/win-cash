@@ -1,4 +1,4 @@
-
+const SASPAY_BASE_URL = "https://api.saspay.me/api/v1";
 const ACTIVATION_PRICES = {
   XOF: 3000,
   XAF: 3000,
@@ -351,7 +351,7 @@ console.log("SASPAY checkout host:", checkoutHost);
         await ensurePaymentSchema(pool);
 
         const paymentResult = await pool.query(
-          `SELECT id, amount, provider_reference, status
+          `SELECT id, amount, provider_reference, status, currency
            FROM activation_payments
            WHERE user_id = $1
              AND provider_reference = $2`,
@@ -366,11 +366,16 @@ console.log("SASPAY checkout host:", checkoutHost);
           });
         }
 
-        if (Number(payment.amount) !== ACTIVATION_AMOUNT) {
-          return res.status(400).json({
-            error: "Montant du paiement incorrect."
-          });
-        }
+       const expectedAmount = ACTIVATION_PRICES[payment.currency];
+
+if (
+  !expectedAmount ||
+  Number(payment.amount) !== expectedAmount
+) {
+  return res.status(400).json({
+    error: "Montant du paiement incorrect."
+  });
+}
 
         if (payment.status === "paid") {
           return res.json({
@@ -390,8 +395,7 @@ console.log("SASPAY checkout host:", checkoutHost);
             error: "Identifiant de paiement non reconnu."
           });
         }
-
-        if (result.currency && result.currency !== ACTIVATION_CURRENCY) {
+if (result.currency && result.currency !== payment.currency) {
           return res.status(400).json({
             error: "Devise du paiement incorrecte."
           });
