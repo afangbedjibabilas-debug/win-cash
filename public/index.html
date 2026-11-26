@@ -564,7 +564,139 @@ function openPage(name){
     btn.classList.toggle("active",btn.dataset.page===name);
   });
 }
+// ======================================
+// WIN CASH - CONNEXION DES DEPOTS SASPAY
+// ======================================
 
+let currentDepositId =
+  sessionStorage.getItem("wincash_deposit_payment_id") || "";
+
+function showDepositMessage(message) {
+  const element = $("depositMessage");
+  element.textContent = message;
+  element.style.display = "block";
+}
+
+async function loadWalletBalance() {
+  const data = await api("/api/payments/wallet");
+
+  $("walletBalance").textContent =
+    Number(data.balanceXof || 0).toLocaleString("fr-FR") + " FCFA";
+}
+
+async function beginDeposit() {
+  const amount = Number($("depositAmount").value);
+
+  if (!Number.isSafeInteger(amount) || amount < 3000) {
+    showDepositMessage("Le dépôt minimum est de 3 000 FCFA.");
+    return;
+  }
+
+  const button = $("startDeposit");
+  button.disabled = true;
+
+  showDepositMessage("Préparation du paiement SASPAY...");
+
+  try {
+    const data = await api("/api/payments/deposit", {
+      method: "POST",
+      body: JSON.stringify({ amount })
+    });
+
+    if (!data.checkoutUrl || !data.paymentId) {
+      throw new Error("Lien de paiement SASPAY invalide.");
+    }
+
+    currentDepositId = data.paymentId;
+
+    sessionStorage.setItem(
+      "wincash_deposit_payment_id",
+      currentDepositId
+    );
+
+    window.location.href = data.checkoutUrl;
+
+  } catch (error) {
+    showDepositMessage(error.message);
+    button.disabled = false;
+  }
+}
+
+async function checkDeposit() {
+  if (!currentDepositId) {
+    showDepositMessage("Aucun dépôt en attente à vérifier.");
+    return;
+  }
+
+  const button = $("checkDeposit");
+  button.disabled = true;
+
+  showDepositMessage(
+    "Vérification du paiement auprès de SASPAY..."
+  );
+
+  try {
+    const result = await api(
+      "/api/payments/deposit/" +
+      encodeURIComponent(currentDepositId) +
+      "/status"
+    );
+
+    if (result.credited) {
+      sessionStorage.removeItem("wincash_deposit_payment_id");
+      currentDepositId = "";
+
+      showDepositMessage(
+        "Paiement confirmé. Votre portefeuille a été crédité."
+      );
+
+      await loadWalletBalance();
+
+      button.style.display = "none";
+
+    } else {
+      showDepositMessage(
+        "Paiement non encore confirmé. Statut : " +
+        (result.status || "EN ATTENTE")
+      );
+    }
+
+  } catch (error) {
+    showDepositMessage(error.message);
+
+  } finally {
+    button.disabled = false;
+  }
+}
+
+$("startDeposit").onclick = beginDeposit;
+$("checkDeposit").onclick = checkDeposit;
+
+// Retour après paiement SASPAY
+if (new URLSearchParams(window.location.search).has("deposit")) {
+  $("checkDeposit").style.display = "block";
+
+  showDepositMessage(
+    "Retour de SASPAY. Cliquez sur Vérifier mon paiement."
+  );
+}
+
+// Actualiser le portefeuille à l'ouverture de la page Dépôt
+const originalOpenPage = openPage;
+
+openPage = function(name) {
+  originalOpenPage(name);
+
+  if (name === "deposit") {
+    loadWalletBalance().catch(error => {
+      showDepositMessage(error.message);
+    });
+
+    if (currentDepositId) {
+      $("checkDeposit").style.display = "block";
+    }
+  }
+};
 document.querySelectorAll(".menu button").forEach(btn=>{
   btn.onclick=()=>openPage(btn.dataset.page);
 });
