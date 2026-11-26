@@ -10,6 +10,7 @@ const crypto = require("crypto");
 const multer = require("multer");
 
 const installPayments = require("./payments");
+const installDeposits = require("./deposits");
 const installAdmin = require("./admin");
 
 const app = express();
@@ -747,6 +748,7 @@ app.post("/api/auth/logout", requireAuth, (req, res) => {
 ========================================= */
 
 installPayments(app, pool, requireAuth);
+installDeposits(app, pool, requireAuth);
 installAdmin(app, pool, requireAuth);
 
 /* =========================================
