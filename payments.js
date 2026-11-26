@@ -59,14 +59,17 @@ return data;
   
 }
 
+
 async function ensurePaymentSchema(pool) {
   await pool.query(`
     ALTER TABLE activation_payments
     ADD COLUMN IF NOT EXISTS checkout_url TEXT,
     ADD COLUMN IF NOT EXISTS country_code VARCHAR(2),
-    ADD COLUMN IF NOT EXISTS currency VARCHAR(3)
+    ADD COLUMN IF NOT EXISTS currency VARCHAR(3),
+    ADD COLUMN IF NOT EXISTS confirmed_at TIMESTAMPTZ
   `);
 }
+
 
 async function activateMember(pool, userId, paymentId) {
   const client = await pool.connect();
