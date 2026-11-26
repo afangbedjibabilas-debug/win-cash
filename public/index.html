@@ -6,475 +6,272 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#080d18">
 <title>WIN CASH — Espace membre</title>
-
 <style>
-:root{
-  font-family:Arial,sans-serif;
-  color:#f4f5f8;
-  background:#080d18;
-  --bg:#080d18;
-  --panel:#111a2a;
-  --panel2:#172337;
-  --gold:#d9ad52;
-  --gold2:#f4d58a;
-  --white:#f4f5f8;
-  --muted:#9aa7ba;
-  --border:#26344a;
-}
+:root{font-family:Arial,sans-serif;color:#f4f5f8;background:#080d18;--panel:#111a2a;--gold:#d9ad52;--gold2:#f4d58a;--muted:#9aa7ba;--border:#26344a}
 *{box-sizing:border-box}
-body{margin:0;min-height:100vh;background:var(--bg);color:var(--white)}
+body{margin:0;background:#080d18}
 button,input,select{font:inherit}
-button{
-  border:1px solid transparent;border-radius:11px;padding:12px 15px;
-  background:linear-gradient(120deg,#c2943c,#f0d28a);
-  color:#111827;font-weight:800;cursor:pointer
-}
-button.secondary{background:#1b2940;color:#f4f5f8;border-color:#31415a}
-button:hover{filter:brightness(1.08)}
-input,select{
-  width:100%;padding:13px;background:#0b1423;
-  border:1px solid #34435b;border-radius:10px;
-  color:white;outline:none
-}
-input:focus,select:focus{border-color:var(--gold)}
-label{display:block;margin:13px 0 6px;font-weight:bold;color:#e8d5aa}
+button{border:0;border-radius:11px;padding:12px 15px;background:linear-gradient(120deg,#c2943c,#f0d28a);color:#111827;font-weight:800;cursor:pointer}
+button:disabled{opacity:.55}
+button.secondary{background:#1b2940;color:white;border:1px solid #31415a}
+input,select{width:100%;padding:13px;background:#0b1423;border:1px solid #34435b;border-radius:10px;color:white}
+label{display:block;margin:13px 0 6px;color:#e8d5aa;font-weight:bold}
 form button{width:100%;margin-top:18px}
 .hidden{display:none!important}
 .muted{color:var(--muted);font-size:13px;line-height:1.6}
-.error{color:#ff8888;margin-top:12px}
-.top{
-  background:#0d1625;color:white;padding:17px 22px;
-  display:flex;justify-content:space-between;align-items:center;
-  border-bottom:1px solid var(--border);
-  position:sticky;top:0;z-index:10
-}
+.top{background:#0d1625;padding:16px 22px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:5}
 .brand{font-size:27px;font-weight:900;letter-spacing:1px;color:var(--gold)}
 .brand small{display:block;font-size:10px;letter-spacing:3px;color:#d8dce5}
 .wrap{max-width:1200px;margin:22px auto;padding:0 15px}
-.card{
-  background:var(--panel);border:1px solid var(--border);
-  border-radius:18px;padding:20px;margin-bottom:15px;
-  box-shadow:0 8px 25px #0003
-}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:20px;margin-bottom:15px}
 .auth{max-width:520px;margin:35px auto}
 .tabs{display:flex;gap:8px;margin-bottom:18px}
 .tabs button{flex:1}
 .layout{display:grid;grid-template-columns:245px 1fr;gap:16px}
 .menu{display:grid;gap:7px;margin-top:17px}
-.menu button{
-  text-align:left;background:#172337;color:#dce3ed;
-  border:1px solid #263750;border-radius:10px
-}
-.menu button.active{
-  background:linear-gradient(110deg,#b98a35,#e8c879);
-  color:#101725;border-color:var(--gold)
-}
-.info{background:#172337;padding:13px;border-radius:10px;margin:8px 0;color:#e5e9ef}
-.notice{
-  background:#2b2417;padding:14px;border-radius:12px;
-  color:#f0d69e;font-size:13px;line-height:1.6;
-  margin:15px 0;border:1px solid #69552c
-}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-footer{text-align:center;color:var(--muted);font-size:12px;margin:25px}
-.dashboard-header{
-  display:flex;justify-content:space-between;
-  align-items:center;flex-wrap:wrap;gap:10px
-}
-.dashboard-header h2{margin-bottom:5px}
-.section-title{font-size:22px;font-weight:900;margin-top:0}
-.stats-grid{
-  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:13px;margin:20px 0
-}
-.stat-card{
-  padding:22px 17px;border-radius:17px;
-  color:white;min-height:115px;
-  border:1px solid #ffffff16;
-  background:linear-gradient(135deg,#18283d,#101a2a)
-}
-.stat-card span{display:block;font-size:14px;margin-bottom:14px;color:#cbd4e2}
-.stat-card strong{font-size:23px;color:var(--gold2)}
-.stat-gold{background:linear-gradient(130deg,#60451d,#a77b2e)}
-.stat-blue{background:linear-gradient(130deg,#152e4b,#1d4964)}
-.stat-green{background:linear-gradient(130deg,#153c34,#17634d)}
-.stat-dark{background:linear-gradient(130deg,#20283a,#111827)}
-.stat-wide{grid-column:1/-1}
-.home-section{
-  background:#111a2a;padding:20px;border-radius:17px;
-  margin:18px 0;border:1px solid var(--border)
-}
-.home-section h3{margin-top:0;color:var(--gold2)}
-.video-frame{
-  background:#050a12;border-radius:15px;
-  overflow:hidden;border:1px solid #5e4b28;
-  text-align:center
-}
-.video-frame img{
-  display:block;width:100%;height:auto;
-  max-height:440px;object-fit:contain;margin:auto
-}
-.video-caption{padding:13px;color:#f1d99f;font-weight:bold}
-.schedule-item{
-  background:#172337;border:1px solid #293a53;
-  border-radius:12px;padding:15px;margin:10px 0;
-  display:flex;justify-content:space-between;
-  align-items:center;gap:10px
-}
-.schedule-day{
-  background:#49391e;color:#f4d58a;
-  border-radius:20px;padding:8px 12px;
-  font-weight:bold;font-size:12px;white-space:nowrap
-}
+.menu button{text-align:left;background:#172337;color:#dce3ed;border:1px solid #263750}
+.menu button.active{background:linear-gradient(110deg,#b98a35,#e8c879);color:#101725}
+.info,.notice{padding:14px;border-radius:12px;margin:10px 0;line-height:1.6}
+.info{background:#172337}
+.notice{background:#2b2417;color:#f0d69e;border:1px solid #69552c;font-size:13px}
 .page-heading{color:var(--gold2);margin-top:0}
-.profile-box{background:#172337;padding:15px;border-radius:12px}
-.menu-title{color:var(--gold2);font-size:12px;letter-spacing:2px}
+.grid,.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.stat{padding:18px;border-radius:15px;background:linear-gradient(130deg,#18283d,#101a2a);border:1px solid #ffffff16}
+.stat span{display:block;color:#cbd4e2;margin-bottom:12px}
+.stat strong{font-size:21px;color:var(--gold2)}
+.wide{grid-column:1/-1}
+.home{background:#111a2a;padding:18px;border-radius:15px;margin:16px 0;border:1px solid var(--border)}
+.schedule{background:#172337;border-radius:12px;padding:13px;margin:8px 0;display:flex;justify-content:space-between}
+.day{color:var(--gold2)}
+footer{text-align:center;color:var(--muted);font-size:12px;margin:25px}
 @media(max-width:700px){
-  .layout{grid-template-columns:1fr}
-  .menu{grid-template-columns:1fr 1fr}
-  .menu button{text-align:center;font-size:12px;padding:12px 5px}
-  .grid{grid-template-columns:1fr}
-  .top{padding:14px}
-}
-@media(max-width:420px){
-  .stats-grid{gap:9px}
-  .stat-card{padding:16px 12px;min-height:105px}
-  .stat-card strong{font-size:19px}
-  .stat-card span{font-size:12px}
-  .brand{font-size:23px}
+.layout{grid-template-columns:1fr}
+.menu{grid-template-columns:repeat(2,minmax(0,1fr))}
+.menu button{text-align:center;font-size:12px;padding:11px 4px}
+.grid{grid-template-columns:1fr}
 }
 </style>
 </head>
-
 <body>
 
 <header class="top">
-  <div>
-    <div class="brand">WIN CASH<small>INVESTMENT</small></div>
-    <div class="muted">Votre ambition, notre priorité !</div>
-  </div>
-  <strong id="headerMember">Membre</strong>
+<div>
+<div class="brand">WIN CASH<small>INVESTMENT</small></div>
+<div class="muted">Votre ambition, notre priorité !</div>
+</div>
+<strong id="headerMember">Membre</strong>
 </header>
 
 <main class="wrap">
 
 <section id="auth" class="card auth">
-  <div class="brand" style="text-align:center;margin-bottom:20px">WIN CASH</div>
-  <div class="tabs">
-    <button id="showLogin" type="button">Connexion</button>
-    <button id="showRegister" class="secondary" type="button">Inscription</button>
-  </div>
+<div class="brand" style="text-align:center">WIN CASH</div>
+<div class="tabs">
+<button id="showLogin" type="button">Connexion</button>
+<button id="showRegister" class="secondary" type="button">Inscription</button>
+</div>
 
-  <form id="registerForm" class="hidden">
-    <label>Prénom</label>
-    <input id="firstName" required maxlength="80">
-    <label>Nom</label>
-    <input id="lastName" required maxlength="80">
-    <label>Adresse e-mail</label>
-    <input id="regEmail" type="email" required>
-    <label>Téléphone</label>
-    <input id="phone" required maxlength="30">
-    <label>Code de parrainage (facultatif)</label>
-    <input id="referralCode" maxlength="30">
-    <label>Mot de passe (10 caractères minimum)</label>
-    <input id="regPassword" type="password" minlength="10" required>
-    <button type="submit">Créer mon compte</button>
-  </form>
+<form id="registerForm" class="hidden">
+<label>Prénom</label>
+<input id="firstName" required maxlength="80">
+<label>Nom</label>
+<input id="lastName" required maxlength="80">
+<label>E-mail</label>
+<input id="regEmail" type="email" required>
+<label>Téléphone</label>
+<input id="phone" required maxlength="30">
+<label>Code de parrainage (facultatif)</label>
+<input id="referralCode" maxlength="30">
+<label>Mot de passe (10 caractères minimum)</label>
+<input id="regPassword" type="password" minlength="10" required>
+<button type="submit">Créer mon compte</button>
+</form>
 
-  <form id="loginForm">
-    <label>Adresse e-mail</label>
-    <input id="loginEmail" type="email" required>
-    <label>Mot de passe</label>
-    <input id="loginPassword" type="password" required>
-    <button type="submit">Se connecter</button>
-  </form>
+<form id="loginForm">
+<label>E-mail</label>
+<input id="loginEmail" type="email" required>
+<label>Mot de passe</label>
+<input id="loginPassword" type="password" required>
+<button type="submit">Se connecter</button>
+</form>
 
-  <div id="message" role="status"></div>
-  <p class="muted" style="text-align:center">Bienvenue sur la plateforme WIN CASH.</p>
+<div id="message" role="status"></div>
+<p class="muted">Bienvenue sur WIN CASH.</p>
 </section>
-  <section id="activation" class="card auth hidden">
-  <h2 class="page-heading">Activation de votre compte</h2>
-  <p>Pour accéder à votre espace WIN CASH, effectuez le paiement unique d'activation.</p>
 
-  <div class="stat-card stat-gold" style="text-align:center">
-    <span>Frais d'activation</span>
-    <strong>3 000 FCFA</strong>
-  </div>
-
-  <p class="muted">
-    Paiement sécurisé via SASPAY. Votre compte sera activé après confirmation.
-  </p>
-
-  <button id="startActivation" type="button" style="width:100%;margin-top:12px">
-    Payer 3 000 FCFA
-  </button>
-
-  <button id="verifyActivation" type="button" class="secondary" style="width:100%;margin-top:10px">
-    J'ai déjà payé — Vérifier
-  </button>
-
-  <div id="activationMessage" role="status" class="notice">
-    Votre compte est en attente d'activation.
-  </div>
-
-  <button id="activationLogout" type="button" class="secondary" style="width:100%">
-    Se déconnecter
-  </button>
-  </section>
+<section id="activation" class="card auth hidden">
+<h2 class="page-heading">Activation de votre compte</h2>
+<p>Effectuez le paiement unique d'activation pour accéder à votre espace.</p>
+<div class="stat" style="text-align:center">
+<span>Frais d'activation</span>
+<strong>3 000 FCFA</strong>
+</div>
+<label>Pays de paiement</label>
+<select id="activationCountry">
+<option value="">Chargement des pays...</option>
+</select>
+<p id="activationPrice" class="notice">Choisissez votre pays.</p>
+<button id="startActivation" type="button" style="width:100%">Payer les frais d'activation</button>
+<button id="verifyActivation" type="button" class="secondary" style="width:100%;margin-top:10px">J'ai déjà payé — Vérifier</button>
+<div id="activationMessage" class="notice" role="status">Compte en attente d'activation.</div>
+<button id="activationLogout" class="secondary" type="button" style="width:100%">Se déconnecter</button>
+</section>
 
 <section id="dashboard" class="hidden">
 <div class="layout">
 
 <aside class="card">
-  <div class="brand">WIN CASH</div>
-  <p class="menu-title">ESPACE PERSONNEL</p>
-  <h3 id="welcomeName">Bienvenue</h3>
+<div class="brand">WIN CASH</div>
+<p class="muted">ESPACE PERSONNEL</p>
+<h3 id="welcomeName">Bienvenue</h3>
 
-  <nav class="menu">
-    <button class="active" data-page="overview">⌂ Tableau de bord</button>
-    <button data-page="revenues">◆ Revenus</button>
-    <button data-page="tasks">▤ Tâches</button>
-    <button data-page="channels">▶ Nos chaînes</button>
-    <button data-page="games">◎ Jeux</button>
-    <button data-page="training">▣ Formation</button>
-    <button data-page="tiktok">♪ Formation TikTok</button>
-    <button data-page="design">✎ Formation Design</button>
-    <button data-page="history">◷ Historique</button>
-    <button data-page="profile">♙ Mon profil</button>
-    <button data-page="deposit">＋ Dépôt</button>
-    <button data-page="withdraw">↗ Retrait</button>
-    <button data-page="referral">♧ Parrainage</button>
-    <button data-page="loan">▣ Demander un prêt</button>
-    <button data-page="about">ⓘ À propos</button>
-  </nav>
+<nav class="menu">
+<button data-page="overview" class="active" type="button">⌂ Tableau de bord</button>
+<button data-page="revenues" type="button">◆ Revenus</button>
+<button data-page="tasks" type="button">▤ Tâches</button>
+<button data-page="channels" type="button">▶ Nos chaînes</button>
+<button data-page="games" type="button">◎ Jeux</button>
+<button data-page="training" type="button">▣ Formation</button>
+<button data-page="tiktok" type="button">♪ Formation TikTok</button>
+<button data-page="design" type="button">✎ Formation Design</button>
+<button data-page="history" type="button">◷ Historique</button>
+<button data-page="profile" type="button">♙ Mon profil</button>
+<button data-page="deposit" type="button">＋ Dépôt</button>
+<button data-page="withdraw" type="button">↗ Retrait</button>
+<button data-page="referral" type="button">♧ Parrainage</button>
+<button data-page="loan" type="button">▣ Demander un prêt</button>
+<button data-page="about" type="button">ⓘ À propos</button>
+</nav>
 
-  <br>
-  <button id="logout" class="secondary" type="button" style="width:100%">
-    Se déconnecter
-  </button>
+<br>
+<button id="logout" class="secondary" type="button" style="width:100%">Se déconnecter</button>
 </aside>
 
 <section class="card">
 
 <div id="page-overview">
+<h2 class="page-heading">Tableau de bord</h2>
+<p>Bienvenue dans votre espace WIN CASH, <strong id="dashboardMemberName"></strong>.</p>
 
-  <div class="dashboard-header">
-    <div>
-      <h2 class="section-title">Tableau de bord</h2>
-      <p class="muted">Bienvenue dans votre espace WIN CASH.</p>
-    </div>
-    <strong id="dashboardMemberName" style="color:var(--gold2)">WIN CASH</strong>
-  </div>
+<div class="stats">
+<div class="stat"><span>Dépenses</span><strong>XOF 0</strong></div>
+<div class="stat"><span>Profit</span><strong>XOF 0</strong></div>
+<div class="stat wide"><span>Solde des jeux</span><strong>XOF 0</strong></div>
+<div class="stat"><span>Solde revenu</span><strong>XOF 0</strong></div>
+<div class="stat"><span>Solde fortune</span><strong id="dashboardWalletBalance">XOF 0</strong></div>
+<div class="stat"><span>Points des tâches</span><strong>0 pts</strong></div>
+<div class="stat wide"><span>Retraits totaux</span><strong>XOF 0</strong></div>
+</div>
 
-  <div class="stats-grid">
-    <div class="stat-card stat-dark">
-      <span>Dépenses</span><strong>XOF 0</strong>
-    </div>
-    <div class="stat-card stat-gold">
-      <span>Profit</span><strong>XOF 0</strong>
-    </div>
-    <div class="stat-card stat-wide stat-blue">
-      <span>◎ Solde des jeux</span><strong>XOF 0</strong>
-    </div>
-    <div class="stat-card stat-green">
-      <span>Solde revenu</span><strong>XOF 0</strong>
-    </div>
-    <div class="stat-card stat-gold">
-      <span>Solde fortune</span><strong>XOF 0</strong>
-    </div>
-    <div class="stat-card stat-dark">
-      <span>Points des tâches</span><strong>0 pts</strong>
-    </div>
-    <div class="stat-card stat-wide stat-blue">
-      <span>Retraits totaux</span><strong>XOF 0</strong>
-    </div>
-  </div>
+<div id="overviewInfo"></div>
 
-  <div class="home-section">
-    <h3>Présentation officielle WIN CASH</h3>
-    <div class="video-frame">
-      <img src="/wincash-presentation.gif"
-           alt="Animation de présentation WIN CASH">
-      <div class="video-caption">WIN CASH — Votre ambition, notre priorité !</div>
-    </div>
-  </div>
+<div class="home">
+<h3>Programme des activités</h3>
+<div class="schedule"><strong>Activités et jeux</strong><span class="day">Lundi</span></div>
+<div class="schedule"><strong>Vidéos TikTok</strong><span class="day">Mardi</span></div>
+<div class="schedule"><strong>Vidéos YouTube</strong><span class="day">Mercredi</span></div>
+<div class="schedule"><strong>Activités et jeux</strong><span class="day">Jeudi</span></div>
+<div class="schedule"><strong>Vidéos Instagram</strong><span class="day">Vendredi</span></div>
+</div>
 
-  <div class="home-section">
-    <h3>Programme des activités</h3>
-    <div class="schedule-item">
-      <strong>◎ Activités et jeux</strong><span class="schedule-day">Lundi</span>
-    </div>
-    <div class="schedule-item">
-      <strong>♪ Vidéos TikTok</strong><span class="schedule-day">Mardi</span>
-    </div>
-    <div class="schedule-item">
-      <strong>▶ Vidéos YouTube</strong><span class="schedule-day">Mercredi</span>
-    </div>
-    <div class="schedule-item">
-      <strong>◎ Activités et jeux</strong><span class="schedule-day">Jeudi</span>
-    </div>
-    <div class="schedule-item">
-      <strong>▣ Vidéos Instagram</strong><span class="schedule-day">Vendredi</span>
-    </div>
-  </div>
-
-  <div id="overviewInfo"></div>
-
-  <div class="notice">
-    Les montants affichés sont provisoires. Ils ne représentent pas des
-    soldes financiers réels tant que les fonctionnalités correspondantes
-    ne sont pas connectées au serveur.
-  </div>
+<div class="notice">Les soldes financiers sont chargés depuis le serveur lorsqu'ils sont disponibles.</div>
 </div>
 
 <div id="page-revenues" class="hidden">
-  <h2 class="page-heading">Mes revenus</h2>
-  <div class="notice">Le suivi des revenus sera disponible lorsque les activités rémunérées seront configurées.</div>
+<h2 class="page-heading">Mes revenus</h2>
+<div class="notice">Le suivi des revenus sera disponible lorsque les activités rémunérées seront configurées.</div>
 </div>
 
 <div id="page-tasks" class="hidden">
-  <h2 class="page-heading">Mes tâches</h2>
-  <p class="muted">Retrouvez ici les activités disponibles.</p>
-  <div class="notice">Les tâches quotidiennes seront activées après leur programmation.</div>
+<h2 class="page-heading">Mes tâches</h2>
+<div class="notice">Les tâches quotidiennes seront activées après leur programmation.</div>
 </div>
 
 <div id="page-channels" class="hidden">
-  <h2 class="page-heading">Nos chaînes</h2>
-  <div class="info">▶ Chaîne YouTube WIN CASH</div>
-  <div class="info">♪ Chaîne TikTok WIN CASH</div>
-  <div class="info">▣ Instagram WIN CASH</div>
-  <div class="notice">Les liens officiels des chaînes seront ajoutés ici.</div>
+<h2 class="page-heading">Nos chaînes</h2>
+<div class="info">YouTube WIN CASH</div>
+<div class="info">TikTok WIN CASH</div>
+<div class="info">Instagram WIN CASH</div>
 </div>
 
 <div id="page-games" class="hidden">
-  <h2 class="page-heading">Jeux</h2>
-  <div class="notice">Les jeux seront activés après la programmation de leurs règles et de leur système de suivi.</div>
+<h2 class="page-heading">Jeux</h2>
+<div class="notice">Les jeux seront activés après programmation de leurs règles.</div>
 </div>
 
 <div id="page-training" class="hidden">
-  <h2 class="page-heading">Formation</h2>
-  <div class="notice">Les contenus de formation seront publiés ici.</div>
+<h2 class="page-heading">Formation</h2>
+<div class="notice">Les contenus de formation seront publiés ici.</div>
 </div>
 
 <div id="page-tiktok" class="hidden">
-  <h2 class="page-heading">Formation TikTok</h2>
-  <div class="notice">Les contenus de formation TikTok seront publiés ici.</div>
+<h2 class="page-heading">Formation TikTok</h2>
+<div class="notice">Les contenus de formation TikTok seront publiés ici.</div>
 </div>
 
 <div id="page-design" class="hidden">
-  <h2 class="page-heading">Formation Design Graphique</h2>
-  <div class="notice">Les contenus de formation en design graphique seront publiés ici.</div>
+<h2 class="page-heading">Formation Design</h2>
+<div class="notice">Les contenus de formation design seront publiés ici.</div>
 </div>
 
 <div id="page-history" class="hidden">
-  <h2 class="page-heading">Historique</h2>
-  <p class="muted">Retrouvez ici le suivi de vos opérations et demandes.</p>
-  <div class="notice">L'historique sera disponible lorsque les opérations seront activées.</div>
+<h2 class="page-heading">Historique</h2>
+<div class="notice">L'historique sera disponible lorsque les opérations seront activées.</div>
 </div>
 
 <div id="page-profile" class="hidden">
-  <h2 class="page-heading">Mon profil</h2>
-  <div id="profileInfo"></div>
-  <div class="notice">
-    La modification du profil et l'envoi des documents nécessitent
-    un système sécurisé côté serveur.
-  </div>
-  <h3>Documents acceptés</h3>
-  <div class="grid">
-    <div class="info">Carte nationale d'identité</div>
-    <div class="info">Passeport</div>
-    <div class="info">Permis de conduire</div>
-    <div class="info">Carte d'électeur</div>
-    <div class="info">Carte biométrique</div>
-    <div class="info">Carte d'étudiant</div>
-    <div class="info">Carte scolaire</div>
-  </div>
-  <p class="muted">Les cartes scolaires et étudiantes pourront servir de justificatifs complémentaires.</p>
-  <p><strong>Statut du dossier :</strong> En attente de mise en service</p>
+<h2 class="page-heading">Mon profil</h2>
+<div id="profileInfo"></div>
+<div class="notice">La modification du profil et l'envoi des documents nécessitent un système sécurisé.</div>
+<h3>Documents acceptés</h3>
+<div class="grid">
+<div class="info">Carte nationale d'identité</div>
+<div class="info">Passeport</div>
+<div class="info">Permis de conduire</div>
+<div class="info">Carte d'électeur</div>
+<div class="info">Carte biométrique</div>
+<div class="info">Carte d'étudiant</div>
+<div class="info">Carte scolaire</div>
+</div>
 </div>
 
 <div id="page-deposit" class="hidden">
-  <h2 class="page-heading">Effectuer un dépôt</h2>
-
-  <div class="card">
-    <h3>Mon portefeuille WIN CASH</h3>
-
-    <div class="info">
-      Solde disponible :
-      <strong id="walletBalance">0 FCFA</strong>
-    </div>
-
-    <p class="muted">
-      Effectuez un dépôt sécurisé pour alimenter votre portefeuille.
-    </p>
-
-    <div class="notice">
-      <strong>Dépôt minimum : 3 000 FCFA</strong>
-      <p>Les dépôts sont effectués en FCFA via SASPAY.</p>
-    </div>
-
-    <label for="depositAmount">Montant du dépôt (FCFA)</label>
-
-    <input
-      id="depositAmount"
-      type="number"
-      min="3000"
-      step="1"
-      placeholder="Exemple : 3000"
-    >
-
-    <button
-      id="startDeposit"
-      type="button"
-      class="btn"
-
-    >
-      Payer avec SASPAY
-    </button>
-
-    <button
-      id="checkDeposit"
-      type="button"
-      class="btn"
-      style="display:none"
-    >
-      Vérifier mon paiement
-    </button>
-
-    <div id="depositMessage" class="notice" style="display:none"></div>
-  </div>
+<h2 class="page-heading">Effectuer un dépôt</h2>
+<div class="card">
+<h3>Mon portefeuille WIN CASH</h3>
+<div class="info">Solde disponible : <strong id="walletBalance">0 FCFA</strong></div>
+<div class="notice">
+<strong>Dépôt minimum : 3 000 FCFA</strong>
+<p>Première phase : Togo, paiement en FCFA (XOF) via SASPAY.</p>
+</div>
+<label for="depositAmount">Montant du dépôt (FCFA)</label>
+<input id="depositAmount" type="number" min="3000" step="1" inputmode="numeric" placeholder="Exemple : 3000">
+<button id="startDeposit" type="button" style="width:100%;margin-top:14px">Payer avec SASPAY</button>
+<button id="checkDeposit" type="button" class="secondary" style="display:none;width:100%;margin-top:10px">Vérifier mon paiement</button>
+<div id="depositMessage" class="notice" style="display:none" role="status" aria-live="polite"></div>
+</div>
 </div>
 
 <div id="page-withdraw" class="hidden">
-  <h2 class="page-heading">Retrait</h2>
-  <div class="notice">
-    Les retraits ne sont pas encore activés. Ils seront disponibles
-    après la mise en place d'un système sécurisé.
-  </div>
+<h2 class="page-heading">Retrait</h2>
+<div class="notice">Les retraits ne sont pas encore activés.</div>
 </div>
 
 <div id="page-referral" class="hidden">
-  <h2 class="page-heading">Mon code parrainage</h2>
-  <div class="info"><strong id="myReferralCode">Non disponible</strong></div>
-  <button id="copyReferral" type="button">Copier mon code</button>
-  <p id="referralMessage" class="muted"></p>
+<h2 class="page-heading">Mon code parrainage</h2>
+<div class="info"><strong id="myReferralCode">Non disponible</strong></div>
+<button id="copyReferral" type="button">Copier mon code</button>
+<p id="referralMessage" class="muted"></p>
 </div>
 
 <div id="page-loan" class="hidden">
-  <h2 class="page-heading">Demander un prêt</h2>
-  <div class="notice">
-    Le formulaire de demande de prêt sera activé après définition
-    des conditions, critères d'éligibilité et modalités de traitement.
-  </div>
+<h2 class="page-heading">Demander un prêt</h2>
+<div class="notice">Le formulaire sera activé après définition des conditions.</div>
 </div>
 
 <div id="page-about" class="hidden">
-  <h2 class="page-heading">À propos de WIN CASH</h2>
-  <p>Bienvenue dans la communauté WIN CASH.</p>
-  <div class="notice">
-    Découvrez nos activités, nos contenus et les fonctionnalités
-    disponibles dans votre espace membre.
-  </div>
+<h2 class="page-heading">À propos de WIN CASH</h2>
+<p>Bienvenue dans la communauté WIN CASH.</p>
 </div>
 
 </section>
@@ -485,731 +282,384 @@ footer{text-align:center;color:var(--muted);font-size:12px;margin:25px}
 </main>
 
 <script>
+"use strict";
+
 const $=id=>document.getElementById(id);
 let currentUser=null;
+let currentDepositId=sessionStorage.getItem("wincash_deposit_payment_id")||"";
+let currentPaymentId=sessionStorage.getItem("wincash_activation_payment_id")||"";
+
+const ACTIVATION_PRICES={
+XOF:3000,
+XAF:3000,
+NGN:6802,
+GHS:59.45,
+GNF:44517
+};
 
 async function api(url,options={}){
-  const response=await fetch(url,{
-    ...options,
-    headers:{"Content-Type":"application/json",...(options.headers||{})},
-    credentials:"same-origin"
-  });
-  const data=await response.json().catch(()=>({error:"Réponse invalide du serveur."}));
-  if(!response.ok)throw new Error(data.error||"Une erreur est survenue.");
-  return data;
+const response=await fetch(url,{
+...options,
+headers:{"Content-Type":"application/json",...(options.headers||{})},
+credentials:"same-origin"
+});
+const data=await response.json().catch(()=>({error:"Réponse invalide du serveur."}));
+if(!response.ok)throw new Error(data.error||"Une erreur est survenue.");
+return data;
 }
 
 function show(mode){
-  $("loginForm").classList.toggle("hidden",mode!=="login");
-  $("registerForm").classList.toggle("hidden",mode!=="register");
-  $("showLogin").className=mode==="login"?"":"secondary";
-  $("showRegister").className=mode==="register"?"":"secondary";
-  $("message").textContent="";
+$("loginForm").classList.toggle("hidden",mode!=="login");
+$("registerForm").classList.toggle("hidden",mode!=="register");
+$("showLogin").className=mode==="login"?"":"secondary";
+$("showRegister").className=mode==="register"?"":"secondary";
+$("message").textContent="";
 }
 
-function addInfo(container,label,value){
-  const p=document.createElement("div");
-  p.className="info";
-  const b=document.createElement("strong");
-  b.textContent=label+" : ";
-  p.append(b,document.createTextNode(value||"Non renseigné"));
-  container.appendChild(p);
+function addInfo(target,label,value){
+const div=document.createElement("div");
+div.className="info";
+const strong=document.createElement("strong");
+strong.textContent=label+" : ";
+div.append(strong,document.createTextNode(value||"Non renseigné"));
+target.appendChild(div);
 }
 
-function render(user){
-  currentUser=user;
-  $("auth").classList.add("hidden");
-
-  const name=user.firstName||"membre";
-  $("headerMember").textContent=name;
-
-  if(user.role!=="admin" && user.activationStatus!=="active"){
-    $("dashboard").classList.add("hidden");
-    $("activation").classList.remove("hidden");
-  loadActivationCountries();
-    $("activationMessage").textContent=
-      "Votre compte est en attente d'activation. Effectuez le paiement unique de 3 000 FCFA.";
-    return;
-  }
-
-  $("activation").classList.add("hidden");
-  $("dashboard").classList.remove("hidden");
-
-  $("welcomeName").textContent="Bonjour, "+name;
-  $("dashboardMemberName").textContent=name;
-
-  $("overviewInfo").replaceChildren();
-  $("profileInfo").replaceChildren();
-
-  addInfo($("overviewInfo"),"Nom",user.lastName);
-  addInfo($("overviewInfo"),"Prénom",user.firstName);
-  addInfo($("overviewInfo"),"E-mail",user.email);
-  addInfo($("overviewInfo"),"Téléphone",user.phone);
-
-  addInfo($("profileInfo"),"Prénom",user.firstName);
-  addInfo($("profileInfo"),"Nom",user.lastName);
-  addInfo($("profileInfo"),"E-mail",user.email);
-  addInfo($("profileInfo"),"Téléphone",user.phone);
-  addInfo($("profileInfo"),"Type de compte",user.role==="admin"?"Administrateur":"Membre");
-
-  $("myReferralCode").textContent=user.referralCode||"Non disponible";
-  openPage("overview");
+function showDepositMessage(message){
+$("depositMessage").textContent=message;
+$("depositMessage").style.display="block";
 }
 
 function openPage(name){
-  document.querySelectorAll("[id^='page-']").forEach(el=>el.classList.add("hidden"));
-  const page=$("page-"+name);
-  if(page)page.classList.remove("hidden");
+document.querySelectorAll("[id^='page-']").forEach(p=>p.classList.add("hidden"));
+const page=$("page-"+name);
+if(page)page.classList.remove("hidden");
 
-  document.querySelectorAll(".menu button").forEach(btn=>{
-    btn.classList.toggle("active",btn.dataset.page===name);
-  });
-}
-// ======================================
-// WIN CASH - CONNEXION DES DEPOTS SASPAY
-// ======================================
-
-let currentDepositId =
-  sessionStorage.getItem("wincash_deposit_payment_id") || "";
-
-function showDepositMessage(message) {
-  const element = $("depositMessage");
-  element.textContent = message;
-  element.style.display = "block";
-}
-
-async function loadWalletBalance() {
-  const data = await api("/api/payments/wallet");
-
-  $("walletBalance").textContent =
-    Number(data.balanceXof || 0).toLocaleString("fr-FR") + " FCFA";
-}
-
-async function beginDeposit() {
-  const amount = Number($("depositAmount").value);
-
-  if (!Number.isSafeInteger(amount) || amount < 3000) {
-    showDepositMessage("Le dépôt minimum est de 3 000 FCFA.");
-    return;
-  }
-
-  const button = $("startDeposit");
-  button.disabled = true;
-
-  showDepositMessage("Préparation du paiement SASPAY...");
-
-  try {
-    const data = await api("/api/payments/deposit", {
-      method: "POST",
-      body: JSON.stringify({ amount })
-    });
-
-    if (!data.checkoutUrl || !data.paymentId) {
-      throw new Error("Lien de paiement SASPAY invalide.");
-    }
-
-    currentDepositId = data.paymentId;
-
-    sessionStorage.setItem(
-      "wincash_deposit_payment_id",
-      currentDepositId
-    );
-
-    window.location.href = data.checkoutUrl;
-
-  } catch (error) {
-    showDepositMessage(error.message);
-    button.disabled = false;
-  }
-}
-
-async function checkDeposit() {
-  if (!currentDepositId) {
-    showDepositMessage("Aucun dépôt en attente à vérifier.");
-    return;
-  }
-
-  const button = $("checkDeposit");
-  button.disabled = true;
-
-  showDepositMessage(
-    "Vérification du paiement auprès de SASPAY..."
-  );
-
-  try {
-    const result = await api(
-      "/api/payments/deposit/" +
-      encodeURIComponent(currentDepositId) +
-      "/status"
-    );
-
-    if (result.credited) {
-      sessionStorage.removeItem("wincash_deposit_payment_id");
-      currentDepositId = "";
-
-      showDepositMessage(
-        "Paiement confirmé. Votre portefeuille a été crédité."
-      );
-
-      await loadWalletBalance();
-
-      button.style.display = "none";
-
-    } else {
-      showDepositMessage(
-        "Paiement non encore confirmé. Statut : " +
-        (result.status || "EN ATTENTE")
-      );
-    }
-
-  } catch (error) {
-    showDepositMessage(error.message);
-
-  } finally {
-    button.disabled = false;
-  }
-}
-
-$("startDeposit").onclick = beginDeposit;
-$("checkDeposit").onclick = checkDeposit;
-
-// Retour après paiement SASPAY
-if (new URLSearchParams(window.location.search).has("deposit")) {
-  $("checkDeposit").style.display = "block";
-
-  showDepositMessage(
-    "Retour de SASPAY. Cliquez sur Vérifier mon paiement."
-  );
-}
-
-// Actualiser le portefeuille à l'ouverture de la page Dépôt
-const originalOpenPage = openPage;
-
-openPage = function(name) {
-  originalOpenPage(name);
-
-  if (name === "deposit") {
-    loadWalletBalance().catch(error => {
-      showDepositMessage(error.message);
-    });
-
-    if (currentDepositId) {
-      $("checkDeposit").style.display = "block";
-    }
-  }
-};
-document.querySelectorAll(".menu button").forEach(btn=>{
-  btn.onclick=()=>openPage(btn.dataset.page);
+document.querySelectorAll(".menu button").forEach(b=>{
+b.classList.toggle("active",b.dataset.page===name);
 });
 
-$("showLogin").onclick=()=>show("login");
-$("showRegister").onclick=()=>show("register");
-
-let currentPaymentId = sessionStorage.getItem("wincash_activation_payment_id") || "";
-
-const ACTIVATION_PRICES = {
-  XOF: 3000,
-  XAF: 3000,
-  NGN: 6802,
-  GHS: 59.45,
-  GNF: 44517
-};
-
-async function loadActivationCountries() {
-  const select = $("activationCountry");
-  const price = $("activationPrice");
-
-  select.innerHTML = '<option value="">Chargement...</option>';
-
-  try {
-    const data = await api("/api/payments/countries");
-    const countries = data.countries || [];
-
-    select.innerHTML = '<option value="">Choisissez votre pays</option>';
-
-    countries
-      .filter(country => country.is_active === true)
-      .forEach(country => {
-        const currency = country.default_currency;
-        const amount = ACTIVATION_PRICES[currency];
-
-        if (!amount) return;
-
-        const option = document.createElement("option");
-        option.value = country.iso_code;
-        option.textContent =
-          (country.name || country.country_name || country.iso_code) +
-          " — " + currency;
-
-        select.appendChild(option);
-      });
-
-    select.onchange = () => {
-      const country = countries.find(
-        item => item.iso_code === select.value
-      );
-
-      if (!country) {
-        price.textContent = "Choisissez votre pays";
-        return;
-      }
-
-      const currency = country.default_currency;
-      const amount = ACTIVATION_PRICES[currency];
-
-      price.textContent =
-        amount.toLocaleString("fr-FR") + " " + currency;
-    };
-
-  } catch (error) {
-    select.innerHTML =
-      '<option value="">Impossible de charger les pays</option>';
-    $("activationMessage").textContent = error.message;
-  }
+if(name==="deposit"&&currentUser){
+loadWalletBalance().catch(e=>showDepositMessage(e.message));
+if(currentDepositId)$("checkDeposit").style.display="block";
 }
-
-$("startActivation").onclick = async () => {
-  const button = $("startActivation");
-  const country = $("activationCountry").value;
-
-  if (!country) {
-    $("activationMessage").textContent =
-      "Veuillez sélectionner votre pays avant de continuer.";
-    return;
-  }
-
-  button.disabled = true;
-  $("activationMessage").textContent = "Préparation du paiement...";
-
-  try {
-    const data = await api("/api/payments/activation", {
-      method: "POST",
-      body: JSON.stringify({ country })
-    });
-
-    if (!data.checkoutUrl || !data.paymentId) {
-      throw new Error("Lien de paiement invalide.");
-    }
-
-    currentPaymentId = data.paymentId;
-
-    sessionStorage.setItem(
-      "wincash_activation_payment_id",
-      currentPaymentId
-    );
-
-    window.location.href = data.checkoutUrl;
-
-  } catch (err) {
-    $("activationMessage").textContent = err.message;
-    button.disabled = false;
-  }
-};
-
-$("verifyActivation").onclick = async () => {
-  const button = $("verifyActivation");
-
-  if (!currentPaymentId) {
-    $("activationMessage").textContent =
-      "Aucun paiement à vérifier. Veuillez commencer votre paiement.";
-    return;
-  }
-
-  button.disabled = true;
-  $("activationMessage").textContent =
-    "Vérification auprès de SASPAY...";
-
-  try {
-    const result = await api(
-      "/api/payments/activation/" +
-      encodeURIComponent(currentPaymentId) +
-      "/status"
-    );
-
-    if (result.activated) {
-      sessionStorage.removeItem("wincash_activation_payment_id");
-      currentPaymentId = "";
-
-      $("activationMessage").textContent = "Paiement confirmé !";
-
-      const me = await api("/api/auth/me");
-      render(me.user);
-
-    } else {
-      $("activationMessage").textContent =
-        "Paiement non encore confirmé. Statut : " +
-        (result.status || "EN ATTENTE");
-    }
-
-  } catch (err) {
-    $("activationMessage").textContent = err.message;
-
-  } finally {
-    button.disabled = false;
-  }
-};
-
-$("activationLogout").onclick = async () => {
-  try {
-    await api("/api/auth/logout", {
-      method: "POST",
-      body: "{}"
-    });
-
-    currentUser = null;
-    sessionStorage.removeItem("wincash_activation_payment_id");
-
-    $("activation").classList.add("hidden");
-    $("dashboard").classList.add("hidden");
-    $("auth").classList.remove("hidden");
-
-    show("login");
-
-  } catch (err) {
-    alert(err.message);
-  }
-};
-
-    button.disabled=false;
-  }
-};
-
-$("activationLogout").onclick=async()=>{
-  try{
-    await api("/api/auth/logout",{method:"POST",body:"{}"});
-    currentUser=null;
-    sessionStorage.removeItem("wincash_activation_payment_id");
-    $("activation").classList.add("hidden");
-    $("dashboard").classList.add("hidden");
-    $("auth").classList.remove("hidden");
-    show("login");
-  }catch(err){
-    alert(err.message);
-  }
-};
-$("registerForm").onsubmit=async e=>{
-  e.preventDefault();
-  $("message").textContent="Création du compte en cours...";
-  try{
-    const data=await api("/api/auth/register",{
-      method:"POST",
-      body:JSON.stringify({
-        firstName:$("firstName").value,
-        lastName:$("lastName").value,
-        email:$("regEmail").value,
-        phone:$("phone").value,
-        referralCode:$("referralCode").value,
-        password:$("regPassword").value
-      })
-    });
-    render(data.user);
-  }catch(err){
-    $("message").textContent=err.message;
-  }
-};
-
-$("loginForm").onsubmit=async e=>{
-  e.preventDefault();
-  $("message").textContent="Connexion en cours...";
-  try{
-    const data=await api("/api/auth/login",{
-      method:"POST",
-      body:JSON.stringify({
-        email:$("loginEmail").value,
-        password:$("loginPassword").value
-      })
-    });
-    if(data.user.role==="admin"){
-      window.location.href="/admin.html";
-    }else{
-      render(data.user);
-    }
-  }catch(err){
-    $("message").textContent=err.message;
-  }
-};
-
-$("copyReferral").onclick=async()=>{
-  const code=currentUser&&currentUser.referralCode;
-  if(!code){
-    $("referralMessage").textContent="Aucun code disponible.";
-    return;
-  }
-  try{
-    await navigator.clipboard.writeText(code);
-    $("referralMessage").textContent="Code copié.";
-  }catch{
-    $("referralMessage").textContent="Copie impossible sur cet appareil. Sélectionnez le code pour le copier.";
-  }
-};
-
-$("logout").onclick=async()=>{
-  try{
-    await api("/api/auth/logout",{method:"POST",body:"{}"});
-    currentUser=null;
-    $("dashboard").classList.add("hidden");
-    $("auth").classList.remove("hidden");
-    show("login");
-  }catch(err){
-    alert(err.message);
-  }
-};
-
-(async()=>{
-  try{
-    const data=await api("/api/auth/me");
-    if(data.user.role==="admin"){
-      window.location.href="/admin.html";
-    }else{
-      render(data.user);
-    }
-  }catch{}
-})();
-</script>
-
-</body>
-</html>
-.</div>
-</div>
-
-<div id="page-design" class="hidden">
-  <h2>Formation Design Graphique</h2>
-  <div class="notice">Les contenus de formation en design graphique seront publiés ici.</div>
-</div>
-
-<div id="page-history" class="hidden">
-  <h2>Historique</h2>
-  <p class="muted">Retrouve ici le suivi de tes opérations et demandes.</p>
-  <div class="notice">L'historique sera disponible lorsque les opérations seront activées.</div>
-</div>
-
-<div id="page-profile" class="hidden">
-  <h2>Mon profil</h2>
-  <div id="profileInfo"></div>
-  <div class="notice">
-    La modification du profil et l'envoi des documents seront activés
-    avec un système sécurisé. Les documents seront privés et accessibles
-    uniquement aux administrateurs autorisés.
-  </div>
-  <h3>Documents acceptés</h3>
-  <div class="grid">
-    <div class="info">Carte nationale d'identité</div>
-    <div class="info">Passeport</div>
-    <div class="info">Permis de conduire</div>
-    <div class="info">Carte d'électeur</div>
-    <div class="info">Carte biométrique</div>
-    <div class="info">Carte d'étudiant</div>
-    <div class="info">Carte scolaire</div>
-  </div>
-  <p class="muted">Les cartes scolaires et étudiantes pourront servir de justificatifs complémentaires.</p>
-  <p><strong>Statut du dossier :</strong> En attente de mise en service</p>
-</div>
-
-<div id="page-deposit" class="hidden">
-  <h2>Dépôt</h2>
-  <div class="notice">
-    Les dépôts sont temporairement indisponibles. N'envoie aucun paiement
-    avant l'activation du moyen officiel de paiement WIN CASH.
-  </div>
-</div>
-
-<div id="page-withdraw" class="hidden">
-  <h2>Retrait</h2>
-  <div class="notice">
-    Les retraits ne sont pas encore activés. Ils seront disponibles
-    après la mise en place d'un système sécurisé.
-  </div>
-</div>
-
-<div id="page-referral" class="hidden">
-  <h2>Mon code parrainage</h2>
-  <div class="info">
-    <strong id="myReferralCode">Non disponible</strong>
-  </div>
-  <button id="copyReferral" type="button">Copier mon code</button>
-  <p id="referralMessage" class="muted"></p>
-</div>
-
-<div id="page-loan" class="hidden">
-  <h2>Demande de prêt</h2>
-  <div class="notice">
-    Le formulaire sera activé après définition des conditions et modalités
-    de traitement des demandes.
-  </div>
-</div>
-
-<div id="page-about" class="hidden">
-  <h2>À propos de WIN CASH</h2>
-  <p>Bienvenue dans la communauté WIN CASH.</p>
-  <div class="notice">
-    Découvrez nos activités, nos contenus et les fonctionnalités
-    disponibles dans votre espace membre.
-  </div>
-</div>
-
-</section>
-</div>
-</section>
-
-<footer>WIN CASH · Espace membre sécurisé</footer>
-</main>
-
-<script>
-const $=id=>document.getElementById(id);
-let currentUser=null;
-
-async function api(url,options={}){
-  const response=await fetch(url,{
-    ...options,
-    headers:{"Content-Type":"application/json",...(options.headers||{})},
-    credentials:"same-origin"
-  });
-  const data=await response.json().catch(()=>({error:"Réponse invalide du serveur."}));
-  if(!response.ok)throw new Error(data.error||"Une erreur est survenue.");
-  return data;
-}
-
-function show(mode){
-  $("loginForm").classList.toggle("hidden",mode!=="login");
-  $("registerForm").classList.toggle("hidden",mode!=="register");
-  $("showLogin").className=mode==="login"?"":"secondary";
-  $("showRegister").className=mode==="register"?"":"secondary";
-  $("message").textContent="";
-}
-
-function addInfo(container,label,value){
-  const p=document.createElement("div");
-  p.className="info";
-  const b=document.createElement("strong");
-  b.textContent=label+" : ";
-  p.append(b,document.createTextNode(value||"Non renseigné"));
-  container.appendChild(p);
 }
 
 function render(user){
-  currentUser=user;
-  $("auth").classList.add("hidden");
-  $("dashboard").classList.remove("hidden");
+currentUser=user;
+$("auth").classList.add("hidden");
+$("headerMember").textContent=user.firstName||"Membre";
 
-  const name=user.firstName||"membre";
-  $("welcomeName").textContent="Bonjour, "+name;
-  $("headerMember").textContent=name;
-  $("dashboardMemberName").textContent=name;
-
-  $("overviewInfo").replaceChildren();
-  $("profileInfo").replaceChildren();
-
-  addInfo($("overviewInfo"),"Nom",user.lastName);
-  addInfo($("overviewInfo"),"Prénom",user.firstName);
-  addInfo($("overviewInfo"),"E-mail",user.email);
-  addInfo($("overviewInfo"),"Téléphone",user.phone);
-
-  addInfo($("profileInfo"),"Prénom",user.firstName);
-  addInfo($("profileInfo"),"Nom",user.lastName);
-  addInfo($("profileInfo"),"E-mail",user.email);
-  addInfo($("profileInfo"),"Téléphone",user.phone);
-  addInfo($("profileInfo"),"Type de compte",user.role==="admin"?"Administrateur":"Membre");
-
-  $("myReferralCode").textContent=user.referralCode||"Non disponible";
-  openPage("overview");
+if(user.role!=="admin"&&user.activationStatus!=="active"){
+$("dashboard").classList.add("hidden");
+$("activation").classList.remove("hidden");
+loadActivationCountries();
+$("activationMessage").textContent="Votre compte est en attente d'activation.";
+return;
 }
 
-function openPage(name){
-  document.querySelectorAll("[id^='page-']").forEach(el=>el.classList.add("hidden"));
-  const page=$("page-"+name);
-  if(page)page.classList.remove("hidden");
+$("activation").classList.add("hidden");
+$("dashboard").classList.remove("hidden");
+$("welcomeName").textContent="Bonjour, "+(user.firstName||"membre");
+$("dashboardMemberName").textContent=user.firstName||"WIN CASH";
 
-  document.querySelectorAll(".menu button").forEach(btn=>{
-    btn.classList.toggle("active",btn.dataset.page===name);
-  });
+$("overviewInfo").replaceChildren();
+$("profileInfo").replaceChildren();
+
+addInfo($("overviewInfo"),"Nom",user.lastName);
+addInfo($("overviewInfo"),"Prénom",user.firstName);
+addInfo($("overviewInfo"),"E-mail",user.email);
+addInfo($("overviewInfo"),"Téléphone",user.phone);
+
+addInfo($("profileInfo"),"Prénom",user.firstName);
+addInfo($("profileInfo"),"Nom",user.lastName);
+addInfo($("profileInfo"),"E-mail",user.email);
+addInfo($("profileInfo"),"Téléphone",user.phone);
+addInfo($("profileInfo"),"Type de compte",user.role==="admin"?"Administrateur":"Membre");
+
+$("myReferralCode").textContent=user.referralCode||"Non disponible";
+openPage("overview");
 }
 
-document.querySelectorAll(".menu button").forEach(btn=>{
-  btn.onclick=()=>openPage(btn.dataset.page);
+async function loadWalletBalance(){
+const d=await api("/api/payments/wallet");
+const n=Number(d.balanceXof||0);
+$("walletBalance").textContent=n.toLocaleString("fr-FR")+" FCFA";
+$("dashboardWalletBalance").textContent="XOF "+n.toLocaleString("fr-FR");
+}
+
+async function beginDeposit(){
+const button=$("startDeposit");
+const amount=Number($("depositAmount").value);
+
+if(!Number.isSafeInteger(amount)||amount<3000){
+showDepositMessage("Le dépôt minimum est de 3 000 FCFA.");
+return;
+}
+
+button.disabled=true;
+showDepositMessage("Préparation du paiement SASPAY...");
+
+try{
+const d=await api("/api/payments/deposit",{
+method:"POST",
+body:JSON.stringify({amount})
 });
 
-$("showLogin").onclick=()=>show("login");
-$("showRegister").onclick=()=>show("register");
+if(!d.checkoutUrl||!d.paymentId){
+throw new Error("Lien de paiement SASPAY invalide.");
+}
 
-$("registerForm").onsubmit=async e=>{
-  e.preventDefault();
-  $("message").textContent="Création du compte en cours...";
-  try{
-    const data=await api("/api/auth/register",{
-      method:"POST",
-      body:JSON.stringify({
-        firstName:$("firstName").value,
-        lastName:$("lastName").value,
-        email:$("regEmail").value,
-        phone:$("phone").value,
-        referralCode:$("referralCode").value,
-        password:$("regPassword").value
-      })
-    });
-    render(data.user);
-  }catch(err){
-    $("message").textContent=err.message;
-  }
+currentDepositId=d.paymentId;
+sessionStorage.setItem("wincash_deposit_payment_id",currentDepositId);
+window.location.href=d.checkoutUrl;
+
+}catch(e){
+showDepositMessage(e.message);
+button.disabled=false;
+}
+}
+
+async function checkDeposit(){
+if(!currentDepositId){
+showDepositMessage("Aucun dépôt en attente à vérifier.");
+return;
+}
+
+const b=$("checkDeposit");
+b.disabled=true;
+showDepositMessage("Vérification auprès de SASPAY...");
+
+try{
+const d=await api("/api/payments/deposit/"+encodeURIComponent(currentDepositId)+"/status");
+
+if(d.credited){
+sessionStorage.removeItem("wincash_deposit_payment_id");
+currentDepositId="";
+showDepositMessage("Paiement confirmé. Votre portefeuille a été crédité.");
+await loadWalletBalance();
+b.style.display="none";
+}else{
+showDepositMessage("Paiement non encore confirmé. Statut : "+(d.status||"EN ATTENTE"));
+}
+
+}catch(e){
+showDepositMessage(e.message);
+}finally{
+b.disabled=false;
+}
+}
+
+async function loadActivationCountries(){
+const select=$("activationCountry");
+select.innerHTML='<option value="">Chargement des pays...</option>';
+
+try{
+const d=await api("/api/payments/countries");
+const countries=d.countries||[];
+
+select.innerHTML='<option value="">Choisissez votre pays</option>';
+
+countries.filter(c=>c.is_active===true).forEach(c=>{
+if(!ACTIVATION_PRICES[c.default_currency])return;
+
+const o=document.createElement("option");
+o.value=c.iso_code;
+o.textContent=(c.name||c.country_name||c.iso_code)+" — "+c.default_currency;
+select.appendChild(o);
+});
+
+select.onchange=()=>{
+const c=countries.find(x=>x.iso_code===select.value);
+const amount=c&&ACTIVATION_PRICES[c.default_currency];
+$("activationPrice").textContent=amount
+?amount.toLocaleString("fr-FR")+" "+c.default_currency
+:"Choisissez votre pays.";
 };
 
-$("loginForm").onsubmit=async e=>{
-  e.preventDefault();
-  $("message").textContent="Connexion en cours...";
-  try{
-    const data=await api("/api/auth/login",{
-      method:"POST",
-      body:JSON.stringify({
-        email:$("loginEmail").value,
-        password:$("loginPassword").value
-      })
-    });
-    if(data.user.role==="admin"){
-      window.location.href="/admin.html";
-    }else{
-      render(data.user);
-    }
-  }catch(err){
-    $("message").textContent=err.message;
-  }
-};
+}catch(e){
+select.innerHTML='<option value="">Impossible de charger les pays</option>';
+$("activationMessage").textContent=e.message;
+}
+}
 
-$("copyReferral").onclick=async()=>{
-  const code=currentUser&&currentUser.referralCode;
-  if(!code){
-    $("referralMessage").textContent="Aucun code disponible.";
-    return;
-  }
-  try{
-    await navigator.clipboard.writeText(code);
-    $("referralMessage").textContent="Code copié.";
-  }catch{
-    $("referralMessage").textContent="Copie impossible sur cet appareil. Sélectionne le code pour le copier.";
-  }
-};
+async function beginActivation(){
+const b=$("startActivation");
+const country=$("activationCountry").value;
 
-$("logout").onclick=async()=>{
-  try{
-    await api("/api/auth/logout",{method:"POST",body:"{}"});
-    currentUser=null;
-    $("dashboard").classList.add("hidden");
-    $("auth").classList.remove("hidden");
-    show("login");
-  }catch(err){
-    alert(err.message);
-  }
-};
+if(!country){
+$("activationMessage").textContent="Veuillez sélectionner votre pays.";
+return;
+}
+
+b.disabled=true;
+$("activationMessage").textContent="Préparation du paiement...";
+
+try{
+const d=await api("/api/payments/activation",{
+method:"POST",
+body:JSON.stringify({country})
+});
+
+if(!d.checkoutUrl||!d.paymentId){
+throw new Error("Lien de paiement invalide.");
+}
+
+currentPaymentId=d.paymentId;
+sessionStorage.setItem("wincash_activation_payment_id",currentPaymentId);
+window.location.href=d.checkoutUrl;
+
+}catch(e){
+$("activationMessage").textContent=e.message;
+b.disabled=false;
+}
+}
+
+async function verifyActivation(){
+if(!currentPaymentId){
+$("activationMessage").textContent="Aucun paiement à vérifier.";
+return;
+}
+
+const b=$("verifyActivation");
+b.disabled=true;
+$("activationMessage").textContent="Vérification auprès de SASPAY...";
+
+try{
+const d=await api("/api/payments/activation/"+encodeURIComponent(currentPaymentId)+"/status");
+
+if(d.activated){
+sessionStorage.removeItem("wincash_activation_payment_id");
+currentPaymentId="";
+const me=await api("/api/auth/me");
+render(me.user);
+}else{
+$("activationMessage").textContent="Paiement non encore confirmé. Statut : "+(d.status||"EN ATTENTE");
+}
+
+}catch(e){
+$("activationMessage").textContent=e.message;
+}finally{
+b.disabled=false;
+}
+}
+
+async function logout(){
+try{
+await api("/api/auth/logout",{method:"POST",body:"{}"});
+currentUser=null;
+
+sessionStorage.removeItem("wincash_activation_payment_id");
+sessionStorage.removeItem("wincash_deposit_payment_id");
+currentPaymentId="";
+currentDepositId="";
+
+$("activation").classList.add("hidden");
+$("dashboard").classList.add("hidden");
+$("auth").classList.remove("hidden");
+show("login");
+
+}catch(e){
+alert(e.message);
+}
+}
+
+$("showLogin").addEventListener("click",()=>show("login"));
+$("showRegister").addEventListener("click",()=>show("register"));
+
+document.querySelectorAll(".menu button").forEach(b=>{
+b.addEventListener("click",()=>openPage(b.dataset.page));
+});
+
+$("startDeposit").addEventListener("click",beginDeposit);
+$("checkDeposit").addEventListener("click",checkDeposit);
+$("startActivation").addEventListener("click",beginActivation);
+$("verifyActivation").addEventListener("click",verifyActivation);
+$("logout").addEventListener("click",logout);
+$("activationLogout").addEventListener("click",logout);
+
+$("registerForm").addEventListener("submit",async e=>{
+e.preventDefault();
+$("message").textContent="Création du compte en cours...";
+
+try{
+const d=await api("/api/auth/register",{
+method:"POST",
+body:JSON.stringify({
+firstName:$("firstName").value,
+lastName:$("lastName").value,
+email:$("regEmail").value,
+phone:$("phone").value,
+referralCode:$("referralCode").value,
+password:$("regPassword").value
+})
+});
+render(d.user);
+
+}catch(err){
+$("message").textContent=err.message;
+}
+});
+
+$("loginForm").addEventListener("submit",async e=>{
+e.preventDefault();
+$("message").textContent="Connexion en cours...";
+
+try{
+const d=await api("/api/auth/login",{
+method:"POST",
+body:JSON.stringify({
+email:$("loginEmail").value,
+password:$("loginPassword").value
+})
+});
+
+if(d.user.role==="admin"){
+window.location.href="/admin.html";
+}else{
+render(d.user);
+}
+
+}catch(err){
+$("message").textContent=err.message;
+}
+});
+
+$("copyReferral").addEventListener("click",async()=>{
+const code=currentUser&&currentUser.referralCode;
+
+if(!code){
+$("referralMessage").textContent="Aucun code disponible.";
+return;
+}
+
+try{
+await navigator.clipboard.writeText(code);
+$("referralMessage").textContent="Code copié.";
+}catch{
+$("referralMessage").textContent="Copie impossible sur cet appareil. Sélectionnez le code pour le copier.";
+}
+});
+
+if(new URLSearchParams(location.search).has("deposit")){
+$("checkDeposit").style.display="block";
+showDepositMessage("Retour de SASPAY. Cliquez sur Vérifier mon paiement.");
+}
 
 (async()=>{
-  try{
-    const data=await api("/api/auth/me");
-    if(data.user.role==="admin"){
-      window.location.href="/admin.html";
-    }else{
-      render(data.user);
-    }
-  }catch{}
+try{
+const d=await api("/api/auth/me");
+
+if(d.user.role==="admin"){
+location.href="/admin.html";
+}else{
+render(d.user);
+}
+
+}catch{
+// Pas de session active : afficher la connexion.
+}
 })();
 </script>
-
 </body>
 </html>
