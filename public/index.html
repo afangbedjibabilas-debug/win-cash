@@ -394,10 +394,53 @@ footer{text-align:center;color:var(--muted);font-size:12px;margin:25px}
 </div>
 
 <div id="page-deposit" class="hidden">
-  <h2 class="page-heading">Dépôt</h2>
-  <div class="notice">
-    Les dépôts sont temporairement indisponibles. N'envoyez aucun paiement
-    avant l'activation du moyen officiel de paiement WIN CASH.
+  <h2 class="page-heading">Effectuer un dépôt</h2>
+
+  <div class="card">
+    <h3>Mon portefeuille WIN CASH</h3>
+
+    <div class="info">
+      Solde disponible :
+      <strong id="walletBalance">0 FCFA</strong>
+    </div>
+
+    <p class="muted">
+      Effectuez un dépôt sécurisé pour alimenter votre portefeuille.
+    </p>
+
+    <div class="notice">
+      <strong>Dépôt minimum : 3 000 FCFA</strong>
+      <p>Les dépôts sont effectués en FCFA via SASPAY.</p>
+    </div>
+
+    <label for="depositAmount">Montant du dépôt (FCFA)</label>
+
+    <input
+      id="depositAmount"
+      type="number"
+      min="3000"
+      step="1"
+      placeholder="Exemple : 3000"
+    >
+
+    <button
+      id="startDeposit"
+      type="button"
+      class="btn"
+    >
+      Payer avec SASPAY
+    </button>
+
+    <button
+      id="checkDeposit"
+      type="button"
+      class="btn"
+      style="display:none"
+    >
+      Vérifier mon paiement
+    </button>
+
+    <div id="depositMessage" class="notice" style="display:none"></div>
   </div>
 </div>
 
