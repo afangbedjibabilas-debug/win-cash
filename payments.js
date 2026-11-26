@@ -60,6 +60,7 @@ return data;
 }
 
 
+
 async function ensurePaymentSchema(pool) {
   await pool.query(`
     ALTER TABLE activation_payments
@@ -68,8 +69,13 @@ async function ensurePaymentSchema(pool) {
     ADD COLUMN IF NOT EXISTS currency VARCHAR(3),
     ADD COLUMN IF NOT EXISTS confirmed_at TIMESTAMPTZ
   `);
-}
 
+  await pool.query(`
+    CREATE UNIQUE INDEX IF NOT EXISTS
+    activation_payments_user_id_uidx
+    ON activation_payments(user_id)
+  `);
+}
 
 async function activateMember(pool, userId, paymentId) {
   const client = await pool.connect();
