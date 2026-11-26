@@ -253,7 +253,7 @@ async function initializeDatabase() {
     ALTER TABLE users
     ADD COLUMN IF NOT EXISTS referral_code VARCHAR(30);
 
-    ALTER TABLE users
+
 
     ALTER TABLE users
     ADD COLUMN IF NOT EXISTS activation_status VARCHAR(20)
