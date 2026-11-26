@@ -144,9 +144,13 @@ async function verifyAndCreditDeposit(
       };
     }
 
-    const verifiedAmount = Number(
-      verified.requested_amount ?? verified.amount
-    );
+    const verifiedAmountRaw =
+  verified.amounts?.requested ??
+  verified.amounts?.requested_amount ??
+  verified.requested_amount ??
+  verified.amount;
+
+const verifiedAmount = Number(verifiedAmountRaw);
 
     if (
       String(verified.id || "") !==
