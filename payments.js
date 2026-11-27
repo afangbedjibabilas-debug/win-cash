@@ -133,17 +133,37 @@ if (
       [payment.id]
     );
 
+    
     const referrerId = userResult.rows[0].referred_by;
 
     if (referrerId) {
-      await client.query(
+      const commissionResult = await client.query(
         `INSERT INTO commissions
          (referrer_id, referred_user_id, amount)
          VALUES ($1, $2, 1000)
-         ON CONFLICT (referred_user_id) DO NOTHING`,
+         ON CONFLICT (referred_user_id) DO NOTHING
+         RETURNING id`,
         [referrerId, userId]
       );
+
+      if (commissionResult.rowCount === 1) {
+        await client.query(
+          `INSERT INTO wallets (user_id, balance_xof)
+           VALUES ($1, 0)
+           ON CONFLICT (user_id) DO NOTHING`,
+          [referrerId]
+        );
+
+        await client.query(
+          `UPDATE wallets
+           SET balance_xof = balance_xof + 1000,
+               updated_at = NOW()
+           WHERE user_id = $1`,
+          [referrerId]
+        );
+      }
     }
+
 
     await client.query("COMMIT");
   } catch (error) {
