@@ -773,8 +773,9 @@ const result = await pool.query(`
 
         const result = await pool.query(`
           SELECT id, home_team, away_team, competition,
-                 starts_at, status, home_score, away_score
-          FROM sport_matches
+       starts_at, status, home_score, away_score,
+       odds_home, odds_draw, odds_away
+FROM sport_matches
           WHERE status IN ('open','closed','published')
           ORDER BY starts_at ASC
           LIMIT 200
