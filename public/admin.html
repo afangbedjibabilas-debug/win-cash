@@ -179,7 +179,16 @@ button.action{border:0;border-radius:6px;padding:8px 10px;margin:2px;font-weight
 
       <label>Date et heure du match</label>
       <input id="sportStartsAt" type="datetime-local" required>
+<h3>Côtes du match (définies par l'administrateur)</h3>
 
+<label>1 — Victoire à domicile</label>
+<input id="sportOddsHome" type="number" min="1.01" max="1000" step="0.001" required placeholder="Ex. : 2.00">
+
+<label>X — Match nul</label>
+<input id="sportOddsDraw" type="number" min="1.01" max="1000" step="0.001" required placeholder="Ex. : 3.20">
+
+<label>2 — Victoire à l'extérieur</label>
+<input id="sportOddsAway" type="number" min="1.01" max="1000" step="0.001" required placeholder="Ex. : 2.80">
       <button class="refresh" type="submit">Programmer le match</button>
     </form>
   </div>
