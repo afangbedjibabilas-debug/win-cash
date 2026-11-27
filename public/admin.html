@@ -560,10 +560,15 @@ el("sportMatchForm").addEventListener("submit", async event => {
     await api("/api/admin/sport/matches", {
       method: "POST",
       body: JSON.stringify({
-        homeTeam: el("sportHome").value.trim(),
-        awayTeam: el("sportAway").value.trim(),
-        competition: el("sportCompetition").value.trim(),
-        startsAt: startsAt.toISOString()
+        
+homeTeam: el("sportHome").value.trim(),
+awayTeam: el("sportAway").value.trim(),
+competition: el("sportCompetition").value.trim(),
+startsAt: startsAt.toISOString(),
+oddsHome: Number(el("sportOddsHome").value),
+oddsDraw: Number(el("sportOddsDraw").value),
+oddsAway: Number(el("sportOddsAway").value)
+
       })
     });
 
