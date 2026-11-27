@@ -71,6 +71,12 @@ async function ensurePaymentSchema(pool) {
   `);
 
   await pool.query(`
+    ALTER TABLE users
+    ADD COLUMN IF NOT EXISTS country_code VARCHAR(2),
+    ADD COLUMN IF NOT EXISTS currency VARCHAR(3)
+  `);
+  
+  await pool.query(`
     CREATE UNIQUE INDEX IF NOT EXISTS
     activation_payments_user_id_uidx
     ON activation_payments(user_id)
