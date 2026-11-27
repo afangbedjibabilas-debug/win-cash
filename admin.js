@@ -314,6 +314,11 @@ module.exports = function installAdmin(app, pool, requireAuth) {
         updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       );
 
+ALTER TABLE sport_matches
+  ADD COLUMN IF NOT EXISTS odds_home NUMERIC(8,3),
+  ADD COLUMN IF NOT EXISTS odds_draw NUMERIC(8,3),
+  ADD COLUMN IF NOT EXISTS odds_away NUMERIC(8,3);
+  
       CREATE INDEX IF NOT EXISTS sport_matches_date_idx
         ON sport_matches(starts_at DESC);
 
@@ -375,22 +380,41 @@ module.exports = function installAdmin(app, pool, requireAuth) {
         const competition = String(req.body.competition || "").trim();
         const startsAt = new Date(req.body.startsAt);
 
+const oddsHome = Number(req.body.oddsHome);
+const oddsDraw = Number(req.body.oddsDraw);
+const oddsAway = Number(req.body.oddsAway);
+        
         if (
           !home || !away || home === away ||
           !competition ||
-          Number.isNaN(startsAt.getTime())
+          Number.isNaN(startsAt.getTime()) || 
+          !Number.isFinite(oddsHome) || oddsHome < 1.01 || oddsHome > 1000 ||
+!Number.isFinite(oddsDraw) || oddsDraw < 1.01 || oddsDraw > 1000 ||
+!Number.isFinite(oddsAway) || oddsAway < 1.01 || oddsAway > 1000
         ) {
           return res.status(400).json({
             error: "Informations du match invalides."
           });
         }
 
-        const result = await pool.query(`
-          INSERT INTO sport_matches
-            (home_team, away_team, competition, starts_at, created_by)
-          VALUES ($1, $2, $3, $4, $5)
-          RETURNING *
-        `, [home, away, competition, startsAt, req.session.userId]);
+        
+const result = await pool.query(`
+  INSERT INTO sport_matches
+    (home_team, away_team, competition, starts_at, created_by,
+     odds_home, odds_draw, odds_away)
+  VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+  RETURNING *
+`, [
+  home,
+  away,
+  competition,
+  startsAt,
+  req.session.userId,
+  oddsHome,
+  oddsDraw,
+  oddsAway
+]);
+
 
         await pool.query(`
           INSERT INTO admin_audit_logs
