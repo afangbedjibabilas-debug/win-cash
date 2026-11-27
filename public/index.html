@@ -196,42 +196,40 @@ footer{text-align:center;color:var(--muted);font-size:12px;margin:25px}
 </div>
 
 
+
 <div id="page-sport" class="hidden">
   <h2 class="page-heading">🏆 WIN CASH SPORT</h2>
-  <p>Bienvenue dans l'espace sportif de WIN CASH.</p>
+  <p>Retrouvez les matchs et les tirages officiels.</p>
 
   <div class="grid">
     <div class="card">
       <h3>⚽ WIN CASH FOOT</h3>
-      <p>Gestion des matchs, championnats, équipes, horaires et résultats.</p>
+      <p>Consultez les matchs programmés et les résultats officiels.</p>
       <button type="button" onclick="openSportModule('foot')">
-        Accéder à WIN CASH FOOT
+        Voir les matchs
       </button>
     </div>
 
     <div class="card">
       <h3>🎱 WIN CASH LOTO</h3>
-      <p>Gestion des tirages, numéros, calendriers et résultats.</p>
+      <p>Consultez les tirages et les cinq numéros gagnants.</p>
       <button type="button" onclick="openSportModule('loto')">
-        Accéder à WIN CASH LOTO
+        Voir les tirages
       </button>
     </div>
   </div>
 
   <div id="sport-foot" class="hidden">
     <h3 class="page-heading">⚽ WIN CASH FOOT</h3>
-    <div id="footContent" class="notice">
-      Espace de gestion des matchs et des résultats.
-    </div>
+    <div id="footContent" class="notice">Chargement des matchs...</div>
   </div>
 
   <div id="sport-loto" class="hidden">
     <h3 class="page-heading">🎱 WIN CASH LOTO</h3>
-    <div id="lotoContent" class="notice">
-      Espace de gestion des tirages et des résultats.
-    </div>
+    <div id="lotoContent" class="notice">Chargement des tirages...</div>
   </div>
 </div>
+
 
 
 <div id="page-training" class="hidden">
@@ -416,6 +414,7 @@ $("myReferralCode").textContent=user.referralCode||"Non disponible";
 openPage("overview");
 }
 
+
 function openSportModule(module) {
   const foot = $("sport-foot");
   const loto = $("sport-loto");
@@ -427,7 +426,97 @@ function openSportModule(module) {
 
   foot.classList.toggle("hidden", module !== "foot");
   loto.classList.toggle("hidden", module !== "loto");
+
+  if (module === "foot") {
+    loadSportMatches();
+  }
+
+  if (module === "loto") {
+    loadSportLoto();
+  }
 }
+
+async function loadSportMatches() {
+  const content = $("footContent");
+  content.textContent = "Chargement des matchs...";
+
+  try {
+    const data = await api("/api/sport/matches");
+
+    content.replaceChildren();
+
+    if (!data.matches || data.matches.length === 0) {
+      content.textContent = "Aucun match disponible pour le moment.";
+      return;
+    }
+
+    data.matches.forEach(match => {
+      const card = document.createElement("div");
+      card.className = "info";
+
+      const title = document.createElement("strong");
+      title.textContent =
+        match.home_team + " - " + match.away_team;
+
+      const details = document.createElement("p");
+      details.textContent =
+        match.competition + " | " +
+        new Date(match.starts_at).toLocaleString("fr-FR");
+
+      const score = document.createElement("p");
+      score.textContent =
+        match.home_score !== null && match.away_score !== null
+          ? "Résultat : " + match.home_score + " - " + match.away_score
+          : "Résultat en attente";
+
+      card.append(title, details, score);
+      content.appendChild(card);
+    });
+
+  } catch (error) {
+    content.textContent = error.message;
+  }
+}
+
+async function loadSportLoto() {
+  const content = $("lotoContent");
+  content.textContent = "Chargement des tirages...";
+
+  try {
+    const data = await api("/api/sport/loto/draws");
+
+    content.replaceChildren();
+
+    if (!data.draws || data.draws.length === 0) {
+      content.textContent = "Aucun tirage disponible pour le moment.";
+      return;
+    }
+
+    data.draws.forEach(draw => {
+      const card = document.createElement("div");
+      card.className = "info";
+
+      const title = document.createElement("strong");
+      title.textContent = "Tirage du " +
+        new Date(draw.draw_date).toLocaleDateString("fr-FR");
+
+      const status = document.createElement("p");
+      status.textContent = "Statut : " + draw.status;
+
+      const numbers = document.createElement("p");
+      numbers.textContent = draw.winning_numbers
+        ? "Numéros gagnants : " + draw.winning_numbers.join(" - ")
+        : "Résultats en attente";
+
+      card.append(title, status, numbers);
+      content.appendChild(card);
+    });
+
+  } catch (error) {
+    content.textContent = error.message;
+  }
+}
+
   
 async function loadWalletBalance(){
 const d=await api("/api/payments/wallet");
