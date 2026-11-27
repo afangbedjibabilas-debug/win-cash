@@ -468,8 +468,12 @@ async function loadSportMatches() {
         match.home_score !== null && match.away_score !== null
           ? "Résultat : " + match.home_score + " - " + match.away_score
           : "Résultat en attente";
-
-      card.append(title, details, score);
+const odds = document.createElement("p");
+odds.textContent =
+  "Côtes : 1 = " + match.odds_home +
+  " | X = " + match.odds_draw +
+  " | 2 = " + match.odds_away;
+      card.append(title, details, odds, score);
       content.appendChild(card);
     });
 
