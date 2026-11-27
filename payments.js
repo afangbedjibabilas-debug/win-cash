@@ -244,29 +244,84 @@ if (!amount) {
     error: "La devise de ce pays n'est pas encore prise en charge."
   });
                                       }
-        const existing = await pool.query(
-          `SELECT provider_reference, checkout_url, status
-           FROM activation_payments
-           WHERE user_id = $1`,
-          [user.id]
-        );
+        
+const existing = await pool.query(
+  `SELECT provider_reference, checkout_url, status
+   FROM activation_payments
+   WHERE user_id = $1`,
+  [user.id]
+);
 
-        const previousPayment = existing.rows[0];
+const previousPayment = existing.rows[0];
 
-        if (previousPayment && previousPayment.status === "pending") {
-          if (previousPayment.checkout_url) {
-            return res.json({
-              ok: true,
-              checkoutUrl: previousPayment.checkout_url,
-              paymentId: previousPayment.provider_reference,
-              message: "Reprends ton paiement en attente."
-            });
-          }
+if (previousPayment && previousPayment.status === "pending") {
+  if (!previousPayment.provider_reference) {
+    return res.status(409).json({
+      error: "Une demande de paiement est déjà en cours."
+    });
+  }
 
-          return res.status(409).json({
-            error: "Une demande de paiement est déjà en cours."
-          });
-        }
+  let sessionStatus;
+
+  try {
+    sessionStatus = await sasPayRequest(
+      `/checkout-sessions/${encodeURIComponent(previousPayment.provider_reference)}/status/`,
+      { method: "GET" }
+    );
+  } catch (error) {
+    console.error("SASPAY session status error:", error.message);
+
+    return res.status(502).json({
+      error: "Impossible de vérifier l'ancienne session SASPAY."
+    });
+  }
+
+  const checkoutStatus =
+    String(sessionStatus.status || "").toUpperCase();
+
+  const transactionStatus =
+    String(sessionStatus.transaction_status || "").toUpperCase();
+
+  if (
+    checkoutStatus === "PAID" ||
+    transactionStatus === "SUCCESS"
+  ) {
+    return res.status(409).json({
+      error: "Cette session est déjà payée. Vérifie ton activation."
+    });
+  }
+
+  if (
+    checkoutStatus === "PENDING" &&
+    previousPayment.checkout_url
+  ) {
+    return res.json({
+      ok: true,
+      checkoutUrl: previousPayment.checkout_url,
+      paymentId: previousPayment.provider_reference,
+      message: "Reprends ton paiement en attente."
+    });
+  }
+
+  if (
+    ["EXPIRED", "CANCELLED", "FAILED"].includes(checkoutStatus) ||
+    ["FAILED", "CANCELLED"].includes(transactionStatus)
+  ) {
+    await pool.query(
+      `UPDATE activation_payments
+       SET status = 'failed'
+       WHERE user_id = $1
+         AND provider_reference = $2
+         AND status = 'pending'`,
+      [user.id, previousPayment.provider_reference]
+    );
+  } else {
+    return res.status(409).json({
+      error: "Statut de paiement non reconnu. Contacte l'administration."
+    });
+  }
+}
+
 
         const payload = {
   amount: Number(amount).toFixed(2),
