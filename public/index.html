@@ -130,7 +130,8 @@ footer{text-align:center;color:var(--muted);font-size:12px;margin:25px}
 <button data-page="revenues" type="button">◆ Revenus</button>
 <button data-page="tasks" type="button">▤ Tâches</button>
 <button data-page="channels" type="button">▶ Nos chaînes</button>
-<button data-page="games" type="button">◎ Jeux</button>
+<button data-page="games" type="button">◎ Jeux</button> 
+  <button data-page="sport" type="button">🏆 WIN CASH SPORT</button>
 <button data-page="training" type="button">▣ Formation</button>
 <button data-page="tiktok" type="button">♪ Formation TikTok</button>
 <button data-page="design" type="button">✎ Formation Design</button>
@@ -194,10 +195,44 @@ footer{text-align:center;color:var(--muted);font-size:12px;margin:25px}
 <div class="info">Instagram WIN CASH</div>
 </div>
 
-<div id="page-games" class="hidden">
-<h2 class="page-heading">Jeux</h2>
-<div class="notice">Les jeux seront activés après programmation de leurs règles.</div>
+
+<div id="page-sport" class="hidden">
+  <h2 class="page-heading">🏆 WIN CASH SPORT</h2>
+  <p>Bienvenue dans l'espace sportif de WIN CASH.</p>
+
+  <div class="grid">
+    <div class="card">
+      <h3>⚽ WIN CASH FOOT</h3>
+      <p>Gestion des matchs, championnats, équipes, horaires et résultats.</p>
+      <button type="button" onclick="openSportModule('foot')">
+        Accéder à WIN CASH FOOT
+      </button>
+    </div>
+
+    <div class="card">
+      <h3>🎱 WIN CASH LOTO</h3>
+      <p>Gestion des tirages, numéros, calendriers et résultats.</p>
+      <button type="button" onclick="openSportModule('loto')">
+        Accéder à WIN CASH LOTO
+      </button>
+    </div>
+  </div>
+
+  <div id="sport-foot" class="hidden">
+    <h3 class="page-heading">⚽ WIN CASH FOOT</h3>
+    <div id="footContent" class="notice">
+      Espace de gestion des matchs et des résultats.
+    </div>
+  </div>
+
+  <div id="sport-loto" class="hidden">
+    <h3 class="page-heading">🎱 WIN CASH LOTO</h3>
+    <div id="lotoContent" class="notice">
+      Espace de gestion des tirages et des résultats.
+    </div>
+  </div>
 </div>
+
 
 <div id="page-training" class="hidden">
 <h2 class="page-heading">Formation</h2>
