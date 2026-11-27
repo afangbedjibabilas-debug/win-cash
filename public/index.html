@@ -416,6 +416,19 @@ $("myReferralCode").textContent=user.referralCode||"Non disponible";
 openPage("overview");
 }
 
+function openSportModule(module) {
+  const foot = $("sport-foot");
+  const loto = $("sport-loto");
+
+  if (!foot || !loto) {
+    console.error("Modules WIN CASH SPORT introuvables.");
+    return;
+  }
+
+  foot.classList.toggle("hidden", module !== "foot");
+  loto.classList.toggle("hidden", module !== "loto");
+}
+  
 async function loadWalletBalance(){
 const d=await api("/api/payments/wallet");
 const n=Number(d.balanceXof||0);
