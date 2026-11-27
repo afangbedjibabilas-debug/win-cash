@@ -117,15 +117,19 @@ if (
       return;
     }
 
+    
     const userResult = await client.query(
       `UPDATE users
        SET activation_status = 'active',
            activated_at = COALESCE(activated_at, NOW()),
+           country_code = $2,
+           currency = $3,
            updated_at = NOW()
        WHERE id = $1
        RETURNING referred_by`,
-      [userId]
+      [userId, payment.country_code, payment.currency]
     );
+
 
     if (!userResult.rows[0]) {
       throw new Error("Membre introuvable.");
