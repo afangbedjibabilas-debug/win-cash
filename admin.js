@@ -333,6 +333,7 @@ module.exports = function installAdmin(app, pool, requireAuth) {
         updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
         CHECK (closes_at > opens_at),
         CHECK (results_at >= closes_at),
+        
         CHECK (
           winning_numbers IS NULL OR
           (
@@ -350,10 +351,10 @@ module.exports = function installAdmin(app, pool, requireAuth) {
               81,82,83,84,85,86,87,88,89,90,
               91,92,93,94,95,96,97,98,99,100
             ]
-        
-    
+          )
         )
       );
+
 
       CREATE INDEX IF NOT EXISTS sport_loto_date_idx
         ON sport_loto_draws(draw_date DESC);
