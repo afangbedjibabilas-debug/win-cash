@@ -161,6 +161,114 @@ button.action{border:0;border-radius:6px;padding:8px 10px;margin:2px;font-weight
 </div>
 </section>
 
+<section id="sport" class="tab hidden">
+
+  <div class="panel">
+    <h2>⚽ WIN CASH FOOT — Programmation des matchs</h2>
+    <p class="muted">Créer les rencontres, définir leur compétition et leur date.</p>
+
+    <form id="sportMatchForm">
+      <label>Équipe à domicile</label>
+      <input id="sportHome" required maxlength="100" placeholder="Ex. : Équipe A">
+
+      <label>Équipe visiteuse</label>
+      <input id="sportAway" required maxlength="100" placeholder="Ex. : Équipe B">
+
+      <label>Championnat / Compétition</label>
+      <input id="sportCompetition" required maxlength="150" placeholder="Ex. : Championnat">
+
+      <label>Date et heure du match</label>
+      <input id="sportStartsAt" type="datetime-local" required>
+
+      <button class="refresh" type="submit">Programmer le match</button>
+    </form>
+  </div>
+
+  <div class="panel">
+    <h2>Matchs programmés</h2>
+    <button class="refresh" id="sportMatchRefresh" type="button">Actualiser les matchs</button>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th><th>Rencontre</th><th>Compétition</th>
+            <th>Date</th><th>Statut</th><th>Score</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="sportMatchRows"></tbody>
+      </table>
+    </div>
+    <p id="sportMatchEmpty" class="muted">Aucun match chargé.</p>
+  </div>
+
+  <div class="panel">
+    <h2>🎱 WIN CASH LOTO — Programmer un tirage</h2>
+    <p class="muted">Créer le calendrier du tirage et ses horaires.</p>
+
+    <form id="sportLotoForm">
+      <label>Date du tirage</label>
+      <input id="lotoDate" type="date" required>
+
+      <label>Ouverture</label>
+      <input id="lotoOpensAt" type="datetime-local" required>
+
+      <label>Clôture</label>
+      <input id="lotoClosesAt" type="datetime-local" required>
+
+      <label>Date et heure de publication des résultats</label>
+      <input id="lotoResultsAt" type="datetime-local" required>
+
+      <button class="refresh" type="submit">Programmer le tirage</button>
+    </form>
+  </div>
+
+  <div class="panel">
+    <h2>Calendrier des tirages</h2>
+    <button class="refresh" id="lotoRefresh" type="button">Actualiser les tirages</button>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th><th>Date</th><th>Ouverture</th>
+            <th>Clôture</th><th>Résultats</th><th>Statut</th>
+            <th>Numéros gagnants</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="lotoRows"></tbody>
+      </table>
+    </div>
+    <p id="lotoEmpty" class="muted">Aucun tirage chargé.</p>
+  </div>
+
+  <div class="panel">
+    <h2>Publication des résultats du LOTO</h2>
+    <p class="muted">Saisir cinq numéros différents, compris entre 1 et 100, après clôture du tirage.</p>
+    <form id="lotoResultForm">
+      <label>Identifiant du tirage</label>
+      <input id="lotoResultId" type="number" min="1" required>
+
+      <label>Les cinq numéros gagnants</label>
+      <div class="grid">
+        <input class="lotoNumber" type="number" min="1" max="100" required placeholder="N° 1">
+        <input class="lotoNumber" type="number" min="1" max="100" required placeholder="N° 2">
+        <input class="lotoNumber" type="number" min="1" max="100" required placeholder="N° 3">
+        <input class="lotoNumber" type="number" min="1" max="100" required placeholder="N° 4">
+        <input class="lotoNumber" type="number" min="1" max="100" required placeholder="N° 5">
+      </div>
+
+      <button class="refresh" type="submit">Publier les résultats</button>
+    </form>
+  </div>
+
+  <div class="panel">
+    <p class="muted">
+      Mode actuel : gestion et affichage des calendriers et résultats uniquement.
+      Aucune mise d'argent, aucun pari et aucun paiement de gain n'est activé par ce panneau.
+    </p>
+  </div>
+
+  </section>
+  
 <div class="panel">
 <button class="refresh" id="refresh">Actualiser les données</button>
 </div>
@@ -308,6 +416,294 @@ function renderOperationTable(bodyId,emptyId,items) {
   el(emptyId).classList.toggle("hidden",items.length > 0);
 }
 
+// ==========================================
+// WIN CASH SPORT — INTERFACE ADMINISTRATEUR
+// ==========================================
+
+function sportStatusLabel(status) {
+  const labels = {
+    scheduled: "Programmé",
+    open: "Ouvert",
+    closed: "Clôturé",
+    finished: "Terminé",
+    published: "Publié"
+  };
+  return labels[status] || status || "—";
+}
+
+async function loadSportMatches() {
+  try {
+    const data = await api("/api/admin/sport/matches");
+    const rows = el("sportMatchRows");
+    rows.replaceChildren();
+
+    const matches = data.matches || [];
+
+    matches.forEach(match => {
+      const tr = document.createElement("tr");
+      cell(tr, match.id);
+      cell(tr, `${match.home_team} - ${match.away_team}`);
+      cell(tr, match.competition);
+      cell(tr, date(match.starts_at));
+      cell(tr, sportStatusLabel(match.status));
+      cell(tr,
+        match.home_score !== null && match.away_score !== null
+          ? `${match.home_score} - ${match.away_score}`
+          : "—"
+      );
+
+      const actions = document.createElement("td");
+
+      if (match.status === "scheduled") {
+        actions.appendChild(actionButton("Ouvrir", "green", () =>
+          updateSportStatus("matches", match.id, "open")
+        ));
+      }
+
+      if (match.status === "open") {
+        actions.appendChild(actionButton("Clôturer", "orange", () =>
+          updateSportStatus("matches", match.id, "closed")
+        ));
+      }
+
+      if (["open", "closed", "finished"].includes(match.status)) {
+        actions.appendChild(actionButton("Publier score", "gray", () =>
+          publishMatchScore(match.id, match.home_team, match.away_team)
+        ));
+      }
+
+      tr.appendChild(actions);
+      rows.appendChild(tr);
+    });
+
+    el("sportMatchEmpty").classList.toggle("hidden", matches.length > 0);
+  } catch (e) {
+    error("Chargement des matchs : " + e.message);
+  }
+}
+
+async function updateSportStatus(type, id, status) {
+  const label = sportStatusLabel(status);
+
+  if (!confirm(`Confirmer : ${label} ?`)) return;
+
+  try {
+    await api(`/api/admin/sport/${type}/${id}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ status })
+    });
+
+    notice("Statut mis à jour.");
+    await loadSportMatches();
+    await loadSportDraws();
+  } catch (e) {
+    error(e.message);
+  }
+}
+
+async function publishMatchScore(id, home, away) {
+  const homeScore = prompt(`Score de ${home} :`);
+  if (homeScore === null) return;
+
+  const awayScore = prompt(`Score de ${away} :`);
+  if (awayScore === null) return;
+
+  if (
+    homeScore.trim() === "" ||
+    awayScore.trim() === "" ||
+    !Number.isSafeInteger(Number(homeScore)) ||
+    !Number.isSafeInteger(Number(awayScore)) ||
+    Number(homeScore) < 0 ||
+    Number(awayScore) < 0
+  ) {
+    error("Entre deux scores entiers valides.");
+    return;
+  }
+
+  if (!confirm("Confirmer la publication de ce résultat ?")) return;
+
+  try {
+    await api(`/api/admin/sport/matches/${id}/result`, {
+      method: "POST",
+      body: JSON.stringify({
+        homeScore: Number(homeScore),
+        awayScore: Number(awayScore)
+      })
+    });
+
+    notice("Résultat du match publié.");
+    await loadSportMatches();
+  } catch (e) {
+    error(e.message);
+  }
+}
+
+el("sportMatchForm").addEventListener("submit", async event => {
+  event.preventDefault();
+
+  try {
+    const startsAt = new Date(el("sportStartsAt").value);
+
+    if (Number.isNaN(startsAt.getTime())) {
+      throw new Error("Date du match invalide.");
+    }
+
+    await api("/api/admin/sport/matches", {
+      method: "POST",
+      body: JSON.stringify({
+        homeTeam: el("sportHome").value.trim(),
+        awayTeam: el("sportAway").value.trim(),
+        competition: el("sportCompetition").value.trim(),
+        startsAt: startsAt.toISOString()
+      })
+    });
+
+    event.target.reset();
+    notice("Match programmé avec succès.");
+    await loadSportMatches();
+  } catch (e) {
+    error(e.message);
+  }
+});
+
+// ==========================================
+// WIN CASH LOTO — CALENDRIER ET RÉSULTATS
+// ==========================================
+
+async function loadSportDraws() {
+  try {
+    const data = await api("/api/admin/sport/loto/draws");
+    const rows = el("lotoRows");
+    rows.replaceChildren();
+
+    const draws = data.draws || [];
+
+    draws.forEach(draw => {
+      const tr = document.createElement("tr");
+
+      cell(tr, draw.id);
+      cell(tr, draw.draw_date);
+      cell(tr, date(draw.opens_at));
+      cell(tr, date(draw.closes_at));
+      cell(tr, date(draw.results_at));
+      cell(tr, sportStatusLabel(draw.status));
+      cell(tr, Array.isArray(draw.winning_numbers)
+        ? draw.winning_numbers.join(" - ")
+        : "En attente"
+      );
+
+      const actions = document.createElement("td");
+
+      if (draw.status === "scheduled") {
+        actions.appendChild(actionButton("Ouvrir", "green", () =>
+          updateSportStatus("loto/draws", draw.id, "open")
+        ));
+      }
+
+      if (draw.status === "open") {
+        actions.appendChild(actionButton("Clôturer", "orange", () =>
+          updateSportStatus("loto/draws", draw.id, "closed")
+        ));
+      }
+
+      if (draw.status === "closed") {
+        actions.appendChild(actionButton("Saisir résultats", "gray", () => {
+          el("lotoResultId").value = draw.id;
+          el("lotoResultId").scrollIntoView({ behavior: "smooth" });
+        }));
+      }
+
+      tr.appendChild(actions);
+      rows.appendChild(tr);
+    });
+
+    el("lotoEmpty").classList.toggle("hidden", draws.length > 0);
+  } catch (e) {
+    error("Chargement des tirages : " + e.message);
+  }
+}
+
+el("sportLotoForm").addEventListener("submit", async event => {
+  event.preventDefault();
+
+  try {
+    const opensAt = new Date(el("lotoOpensAt").value);
+    const closesAt = new Date(el("lotoClosesAt").value);
+    const resultsAt = new Date(el("lotoResultsAt").value);
+
+    if (
+      Number.isNaN(opensAt.getTime()) ||
+      Number.isNaN(closesAt.getTime()) ||
+      Number.isNaN(resultsAt.getTime()) ||
+      closesAt <= opensAt ||
+      resultsAt < closesAt
+    ) {
+      throw new Error("Vérifie les horaires du tirage.");
+    }
+
+    await api("/api/admin/sport/loto/draws", {
+      method: "POST",
+      body: JSON.stringify({
+        drawDate: el("lotoDate").value,
+        opensAt: opensAt.toISOString(),
+        closesAt: closesAt.toISOString(),
+        resultsAt: resultsAt.toISOString()
+      })
+    });
+
+    event.target.reset();
+    notice("Tirage programmé avec succès.");
+    await loadSportDraws();
+  } catch (e) {
+    error(e.message);
+  }
+});
+
+el("lotoResultForm").addEventListener("submit", async event => {
+  event.preventDefault();
+
+  const numbers = Array.from(
+    document.querySelectorAll(".lotoNumber")
+  ).map(input => Number(input.value));
+
+  if (
+    numbers.some(n => !Number.isInteger(n) || n < 1 || n > 100) ||
+    new Set(numbers).size !== 5
+  ) {
+    error("Il faut cinq numéros différents entre 1 et 100.");
+    return;
+  }
+
+  if (!confirm("Confirmer définitivement la publication de ces cinq numéros ?")) {
+    return;
+  }
+
+  try {
+    const id = Number(el("lotoResultId").value);
+
+    await api(`/api/admin/sport/loto/draws/${id}/result`, {
+      method: "POST",
+      body: JSON.stringify({ numbers })
+    });
+
+    event.target.reset();
+    notice("Résultats du tirage publiés.");
+    await loadSportDraws();
+  } catch (e) {
+    error(e.message);
+  }
+});
+
+el("sportMatchRefresh").addEventListener("click", loadSportMatches);
+el("lotoRefresh").addEventListener("click", loadSportDraws);
+
+// Charger les données lorsque l'administrateur ouvre WIN CASH SPORT
+document.querySelector('nav button[data-tab="sport"]')
+  .addEventListener("click", () => {
+    loadSportMatches();
+    loadSportDraws();
+  });
+      
 async function logout() {
   const button = el("logout");
   if (!confirm("Voulez-vous vraiment vous déconnecter de WIN CASH ?")) return;
