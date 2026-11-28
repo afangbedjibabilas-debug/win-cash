@@ -274,11 +274,11 @@ footer{text-align:center;color:var(--muted);font-size:12px;margin:25px}
 <h3>Mon portefeuille WIN CASH</h3>
 <div class="info">Solde disponible : <strong id="walletBalance">0 FCFA</strong></div>
 <div class="notice">
-<strong>Dépôt minimum : 3 000 FCFA</strong>
-<p>Première phase : Togo, paiement en FCFA (XOF) via SASPAY.</p>
+<strong id="depositMinimum">Dépôt minimum : chargement...</strong>
+<p id="depositCountryInfo">Paiement dans la monnaie de votre pays.</p>
 </div>
-<label for="depositAmount">Montant du dépôt (FCFA)</label>
-<input id="depositAmount" type="number" min="3000" step="1" inputmode="numeric" placeholder="Exemple : 3000">
+<label for="depositAmount" id="depositAmountLabel">Montant du dépôt</label>
+<input id="depositAmount" type="number" min="1" step="any" inputmode="decimal" placeholder="Entrez le montant">
 <button id="startDeposit" type="button" style="width:100%;margin-top:14px">Payer avec SASPAY</button>
 <button id="checkDeposit" type="button" class="secondary" style="display:none;width:100%;margin-top:10px">Vérifier mon paiement</button>
 <div id="depositMessage" class="notice" style="display:none" role="status" aria-live="polite"></div>
