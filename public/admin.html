@@ -711,7 +711,63 @@ async function loadSportDraws() {
     error("Chargement des tirages : " + e.message);
   }
 }
+async function loadLotoEntries() {
+  const drawId = Number(el("lotoEntriesDrawId").value);
+  const rows = el("lotoEntriesRows");
 
+  if (!Number.isSafeInteger(drawId) || drawId < 1) {
+    error("Entre un identifiant de tirage valide.");
+    return;
+  }
+
+  try {
+    el("lotoEntriesMessage").textContent = "Chargement...";
+    const data = await api(
+      `/api/admin/sport/loto/draws/${drawId}/entries`
+    );
+
+    rows.replaceChildren();
+
+    const entries = data.entries || [];
+
+    entries.forEach(entry => {
+      const tr = document.createElement("tr");
+
+      cell(
+        tr,
+        [entry.first_name, entry.last_name]
+          .filter(Boolean).join(" ") || "Membre"
+      );
+      cell(tr, entry.selected_number);
+      cell(
+        tr,
+        Number(entry.amount_xof).toLocaleString("fr-FR")
+      );
+      cell(tr, date(entry.created_at));
+
+      rows.appendChild(tr);
+    });
+
+    el("lotoEntriesCount").textContent =
+      data.summary.total_entries || 0;
+
+    el("lotoEntriesAmount").textContent =
+      Number(data.summary.total_amount_xof || 0)
+        .toLocaleString("fr-FR");
+
+    el("lotoEntriesMessage").textContent =
+      entries.length
+        ? "Participations chargées."
+        : "Aucune participation pour ce tirage.";
+
+  } catch (e) {
+    error(e.message);
+    el("lotoEntriesMessage").textContent =
+      "Impossible de charger les participations.";
+  }
+}
+
+el("lotoEntriesLoad").addEventListener("click", loadLotoEntries);
 el("sportLotoForm").addEventListener("submit", async event => {
   event.preventDefault();
 
