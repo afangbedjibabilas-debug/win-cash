@@ -300,19 +300,12 @@ module.exports = function installDeposits(
       try {
         await ensureDepositSchema(pool);
 
+        
         const amount = Number(req.body.amount);
 
-        if (
-          !Number.isSafeInteger(amount) ||
-          amount < MIN_DEPOSIT_XOF
-        ) {
-          return res.status(400).json({
-            error: "Le dépôt minimum est de 3 000 FCFA."
-          });
-        }
-
         const userResult = await pool.query(
-          `SELECT id, first_name, last_name, email
+          `SELECT id, first_name, last_name, email,
+                  country_code, currency, activation_status
            FROM users
            WHERE id = $1`,
           [req.session.userId]
@@ -325,6 +318,47 @@ module.exports = function installDeposits(
             error: "Compte introuvable."
           });
         }
+
+        const minimumLocalAmounts = {
+          XOF: 3000,
+          XAF: 3000,
+          NGN: 6802,
+          GHS: 59.45,
+          GNF: 44517
+        };
+
+        const minimumLocalAmount =
+          minimumLocalAmounts[user.currency];
+
+        if (user.activation_status !== "active") {
+          return res.status(403).json({
+            error: "Votre compte doit être activé."
+          });
+        }
+
+        if (
+          !user.country_code ||
+          !minimumLocalAmount ||
+          !Number.isFinite(amount) ||
+          amount < minimumLocalAmount
+        ) {
+          return res.status(400).json({
+            error: "Montant minimum ou devise non prise en charge."
+          });
+        }
+
+        const exchangeRate = 3000 / minimumLocalAmount;
+        const amountXof = Math.round(amount * exchangeRate);
+
+        if (
+          !Number.isSafeInteger(amountXof) ||
+          amountXof < 3000
+        ) {
+          return res.status(400).json({
+            error: "Le dépôt doit représenter au moins 3 000 FCFA."
+          });
+        }
+
 
         // Phase 1 : Togo uniquement, paiement en XOF.
         const client = await pool.connect();
@@ -370,15 +404,24 @@ module.exports = function installDeposits(
             });
           }
 
+          
           const inserted = await client.query(
             `INSERT INTO deposits
                (user_id, country_code, currency,
                 local_amount, exchange_rate,
                 amount_xof, status)
-             VALUES ($1, 'TG', 'XOF', $2, 1, $2, 'pending')
+             VALUES ($1, $2, $3, $4, $5, $6, 'pending')
              RETURNING id`,
-            [user.id, amount]
+            [
+              user.id,
+              user.country_code,
+              user.currency,
+              amount,
+              exchangeRate,
+              amountXof
+            ]
           );
+
 
           depositId = inserted.rows[0].id;
 
