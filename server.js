@@ -13,6 +13,7 @@ const installPayments = require("./payments");
 const installDeposits = require("./deposits");
 const installAdmin = require("./admin");
 const installSupport = require("./support");
+const installWithdrawals = require("./withdrawals");
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
 const isProduction = process.env.NODE_ENV === "production";
@@ -753,7 +754,7 @@ installPayments(app, pool, requireAuth);
 installDeposits(app, pool, requireAuth);
 installAdmin(app, pool, requireAuth);
 installSupport(app, pool, requireAuth);
-installSupport(app, pool, requireAuth);
+installWithdrawals(app, pool, requireAuth);
 /* =========================================
    FICHIERS PUBLICS
 ========================================= */
