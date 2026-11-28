@@ -871,7 +871,63 @@ FROM sport_matches
       }
     }
   );
-  
+
+
+    // ADMIN — consulter les participations d'un tirage LOTO
+  app.get(
+    "/api/admin/sport/loto/draws/:id/entries",
+    requireAuth,
+    requireAdmin,
+    async (req, res) => {
+      try {
+        await ensureSportSchema();
+
+        const drawId = Number(req.params.id);
+
+        if (!Number.isSafeInteger(drawId) || drawId < 1) {
+          return res.status(400).json({
+            error: "Identifiant de tirage invalide."
+          });
+        }
+
+        const result = await pool.query(`
+          SELECT
+            e.id,
+            e.draw_id,
+            e.selected_number,
+            e.amount_xof,
+            e.created_at,
+            u.first_name,
+            u.last_name,
+            u.email,
+            u.phone
+          FROM sport_loto_entries e
+          JOIN users u ON u.id = e.user_id
+          WHERE e.draw_id = $1
+          ORDER BY e.created_at DESC
+          LIMIT 2000
+        `, [drawId]);
+
+        const summary = await pool.query(`
+          SELECT
+            COUNT(*)::int AS total_entries,
+            COALESCE(SUM(amount_xof), 0)::bigint AS total_amount_xof
+          FROM sport_loto_entries
+          WHERE draw_id = $1
+        `, [drawId]);
+
+        res.json({
+          entries: result.rows,
+          summary: summary.rows[0]
+        });
+      } catch (err) {
+        console.error("Admin LOTO entries:", err.message);
+        res.status(500).json({
+          error: "Impossible de charger les participations."
+        });
+      }
+    }
+  );
   // MEMBRES — consulter les tirages et résultats publiés
   app.get(
     "/api/sport/loto/draws",
