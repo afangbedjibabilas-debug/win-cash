@@ -317,6 +317,10 @@ async function initializeDatabase() {
       status VARCHAR(20) NOT NULL DEFAULT 'pending',
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
+    
+ALTER TABLE withdrawals
+ADD COLUMN IF NOT EXISTS mobile_money_number VARCHAR(30);
+
 CREATE TABLE IF NOT EXISTS wallets (
   id BIGSERIAL PRIMARY KEY,
   user_id BIGINT NOT NULL UNIQUE REFERENCES users(id),
