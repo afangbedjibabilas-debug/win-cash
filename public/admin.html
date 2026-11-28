@@ -890,7 +890,75 @@ async function logout() {
     error("Impossible de fermer la session : " + e.message);
   }
 }
+async function loadWithdrawals() {
+  const tbody = el("withdrawalRows");
+  const empty = el("withdrawalEmpty");
 
+  try {
+    const data = await api("/api/admin/withdrawals");
+    const withdrawals = data.withdrawals || [];
+
+    tbody.replaceChildren();
+
+    empty.classList.toggle("hidden", withdrawals.length > 0);
+
+    withdrawals.forEach(w => {
+      const tr = document.createElement("tr");
+
+      cell(tr, w.id);
+      cell(tr, [w.first_name, w.last_name].filter(Boolean).join(" "));
+      cell(tr, Number(w.amount).toLocaleString("fr-FR") + " FCFA");
+      cell(tr, w.mobile_money_provider);
+      cell(tr, w.mobile_money_number);
+
+      const status = cell(tr,
+        w.status === "pending" ? "En attente" :
+        w.status === "validated" ? "Validé" : "Échoué"
+      );
+
+      cell(tr, date(w.created_at));
+
+      const actions = document.createElement("td");
+
+      if (w.status === "pending") {
+        actions.appendChild(actionButton("Valider", "success", async () => {
+          await updateWithdrawalStatus(w.id, "validated");
+        }));
+
+        actions.appendChild(actionButton("Refuser", "danger", async () => {
+          await updateWithdrawalStatus(w.id, "failed");
+        }));
+      }
+
+      tr.appendChild(actions);
+      tbody.appendChild(tr);
+    });
+
+  } catch (e) {
+    error(e.message);
+  }
+}
+
+async function updateWithdrawalStatus(id, status) {
+  const message = status === "validated"
+    ? "Valider ce retrait ?"
+    : "Refuser ce retrait ? Aucun remboursement automatique ne sera effectué.";
+
+  if (!confirm(message)) return;
+
+  try {
+    const data = await api("/api/admin/withdrawals/" + id + "/status", {
+      method: "PATCH",
+      body: JSON.stringify({ status })
+    });
+
+    notice(data.message);
+    await loadWithdrawals();
+
+  } catch (e) {
+    error(e.message);
+  }
+  }
 async function load() {
   el("error").classList.add("hidden");
 
@@ -960,7 +1028,7 @@ async function load() {
     });
 
     el("historyEmpty").classList.toggle("hidden", historyItems.length > 0);
-
+await loadWithdrawals();
   } catch(e) {
     error(e.message + " Vérifie que tu es connecté avec ton compte administrateur.");
   }
