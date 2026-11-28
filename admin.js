@@ -808,6 +808,70 @@ FROM sport_matches
     }
   );
 
+  
+  // MEMBRES — enregistrer une participation WIN CASH LOTO
+  app.post(
+    "/api/sport/loto/draws/:id/entries",
+    requireAuth,
+    async (req, res) => {
+      try {
+        await ensureSportSchema();
+
+        const drawId = Number(req.params.id);
+        const selectedNumber = Number(req.body.selectedNumber);
+        const amountXof = Number(req.body.amountXof);
+
+        if (
+          !Number.isSafeInteger(drawId) || drawId < 1 ||
+          !Number.isInteger(selectedNumber) ||
+          selectedNumber < 1 || selectedNumber > 100 ||
+          !Number.isSafeInteger(amountXof) ||
+          amountXof < 1000
+        ) {
+          return res.status(400).json({
+            error: "Numéro invalide ou montant minimum de 1 000 FCFA."
+          });
+        }
+
+        const result = await pool.query(`
+          INSERT INTO sport_loto_entries
+            (draw_id, user_id, selected_number, amount_xof)
+          SELECT id, $2, $3, $4
+          FROM sport_loto_draws
+          WHERE id = $1
+            AND status = 'open'
+            AND NOW() >= opens_at
+            AND NOW() < closes_at
+          RETURNING id, draw_id, selected_number,
+                    amount_xof, created_at
+        `, [
+          drawId,
+          req.session.userId,
+          selectedNumber,
+          amountXof
+        ]);
+
+        if (!result.rowCount) {
+          return res.status(409).json({
+            error: "Ce tirage n'est pas ouvert aux participations."
+          });
+        }
+
+        res.status(201).json({
+          ok: true,
+          entry: result.rows[0],
+          message: "Participation enregistrée."
+        });
+
+      } catch (err) {
+        console.error("Loto participation:", err.message);
+        res.status(500).json({
+          error: "Impossible d'enregistrer la participation."
+        });
+      }
+    }
+  );
+  
   // MEMBRES — consulter les tirages et résultats publiés
   app.get(
     "/api/sport/loto/draws",
