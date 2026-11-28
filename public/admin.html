@@ -285,6 +285,44 @@ button.action{border:0;border-radius:6px;padding:8px 10px;margin:2px;font-weight
     <p id="lotoEmpty" class="muted">Aucun tirage chargé.</p>
   </div>
 
+ <div class="panel">
+  <h2>Participations WIN CASH LOTO</h2>
+  <label>Identifiant du tirage</label>
+  <input id="lotoEntriesDrawId" type="number" min="1"
+    placeholder="ID du tirage">
+
+  <button class="refresh" type="button"
+    id="lotoEntriesLoad">Voir les participations</button>
+
+  <div class="stats">
+    <div class="stat">
+      <span>Total des participations</span>
+      <strong id="lotoEntriesCount">0</strong>
+    </div>
+    <div class="stat">
+      <span>Montant total (FCFA)</span>
+      <strong id="lotoEntriesAmount">0</strong>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Membre</th>
+          <th>Numéro choisi</th>
+          <th>Montant (FCFA)</th>
+          <th>Date et heure</th>
+        </tr>
+      </thead>
+      <tbody id="lotoEntriesRows"></tbody>
+    </table>
+  </div>
+  <p id="lotoEntriesMessage" class="muted">
+    Sélectionnez un tirage pour consulter les participations.
+  </p>
+ </div>
+  
   <div class="panel">
     <h2>Publication des résultats du LOTO</h2>
     <p class="muted">Saisir cinq numéros différents, compris entre 1 et 100, après clôture du tirage.</p>
