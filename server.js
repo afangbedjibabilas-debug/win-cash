@@ -132,7 +132,9 @@ function publicUser(row) {
     lastName: row.last_name,
     email: row.email,
     phone: row.phone,
-    role: row.role,
+countryCode: row.country_code,
+currency: row.currency,
+role: row.role,
     createdAt: row.created_at,
     referralCode: row.referral_code,
     activationStatus: row.activation_status,
@@ -541,8 +543,8 @@ app.post("/api/auth/login", authLimiter, async (req, res) => {
 app.get("/api/auth/me", requireAuth, async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT id,first_name,last_name,email,phone,role,created_at,
-              referral_code,activation_status,activated_at
+      `SELECT id,first_name,last_name,email,phone,country_code,currency,
+       role,created_at,referral_code,activation_status,activated_at
        FROM users
        WHERE id=$1`,
       [req.session.userId]
