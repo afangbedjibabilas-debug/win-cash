@@ -546,6 +546,8 @@ odds.textContent =
 }
 
 async function loadSportLoto() {
+
+async function loadSportLoto() {
   const content = $("lotoContent");
   content.textContent = "Chargement des tirages...";
 
@@ -576,6 +578,75 @@ async function loadSportLoto() {
         : "Résultats en attente";
 
       card.append(title, status, numbers);
+
+      if (draw.status === "open") {
+        const form = document.createElement("form");
+        form.style.marginTop = "15px";
+
+        const numberLabel = document.createElement("label");
+        numberLabel.textContent = "Choisissez votre numéro (1 à 100)";
+
+        const numberInput = document.createElement("input");
+        numberInput.type = "number";
+        numberInput.min = "1";
+        numberInput.max = "100";
+        numberInput.required = true;
+        numberInput.placeholder = "Votre numéro";
+
+        const amountLabel = document.createElement("label");
+        amountLabel.textContent = "Montant de participation (FCFA)";
+
+        const amountInput = document.createElement("input");
+        amountInput.type = "number";
+        amountInput.min = "1000";
+        amountInput.step = "1";
+        amountInput.required = true;
+        amountInput.placeholder = "Minimum 1 000 FCFA";
+
+        const submit = document.createElement("button");
+        submit.type = "submit";
+        submit.textContent = "Enregistrer ma participation";
+
+        const message = document.createElement("p");
+
+        form.append(
+          numberLabel,
+          numberInput,
+          amountLabel,
+          amountInput,
+          submit,
+          message
+        );
+
+        form.addEventListener("submit", async event => {
+          event.preventDefault();
+          submit.disabled = true;
+          message.textContent = "Enregistrement...";
+
+          try {
+            await api(
+              `/api/sport/loto/draws/${draw.id}/entries`,
+              {
+                method: "POST",
+                body: JSON.stringify({
+                  selectedNumber: Number(numberInput.value),
+                  amountXof: Number(amountInput.value)
+                })
+              }
+            );
+
+            message.textContent = "Participation enregistrée.";
+            form.reset();
+          } catch (error) {
+            message.textContent = error.message;
+          } finally {
+            submit.disabled = false;
+          }
+        });
+
+        card.appendChild(form);
+      }
+
       content.appendChild(card);
     });
 
@@ -583,6 +654,7 @@ async function loadSportLoto() {
     content.textContent = error.message;
   }
 }
+
 
   
 async function loadWalletBalance(){
