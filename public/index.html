@@ -142,6 +142,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;margin:25px}
 <button data-page="referral" type="button">♧ Parrainage</button>
 <button data-page="loan" type="button">▣ Demander un prêt</button>
 <button data-page="about" type="button">ⓘ À propos</button>
+  <button data-page="support" type="button">✉ Contact / Réclamations</button>
 </nav>
 
 <br>
@@ -306,7 +307,42 @@ footer{text-align:center;color:var(--muted);font-size:12px;margin:25px}
 <h2 class="page-heading">À propos de WIN CASH</h2>
 <p>Bienvenue dans la communauté WIN CASH.</p>
 </div>
+<div id="page-support" class="hidden">
+  <h2 class="page-heading">Contact / Réclamations</h2>
+  <p>Écrivez directement à l'administration WIN CASH.</p>
 
+  <div class="card">
+    <h3>Nouvelle réclamation</h3>
+    <form id="supportForm">
+      <label for="supportSubject">Sujet</label>
+      <input id="supportSubject" maxlength="150" required
+        placeholder="Ex. : Problème de dépôt">
+
+      <label for="supportMessage">Votre message</label>
+      <textarea id="supportMessage" maxlength="5000" required
+        rows="5" placeholder="Expliquez votre problème..."></textarea>
+
+      <button type="submit">Envoyer à l'administration</button>
+    </form>
+    <p id="supportNotice" class="notice" role="status"></p>
+  </div>
+
+  <div class="card">
+    <h3>Mes réclamations</h3>
+    <div id="supportThreads">Chargement des réclamations...</div>
+  </div>
+
+  <div id="supportConversation" class="card hidden">
+    <h3>Conversation</h3>
+    <div id="supportMessages"></div>
+    <form id="supportReplyForm">
+      <label for="supportReply">Votre réponse</label>
+      <textarea id="supportReply" rows="4" maxlength="5000"
+        required placeholder="Écrire une réponse..."></textarea>
+      <button type="submit">Envoyer la réponse</button>
+    </form>
+  </div>
+        </div>
 </section>
 </div>
 </section>
@@ -830,6 +866,149 @@ render(d.user);
 // Pas de session active : afficher la connexion.
 }
 })();
+  
+let currentSupportThreadId = null;
+
+async function loadSupportThreads() {
+  const container = $("supportThreads");
+  container.textContent = "Chargement...";
+
+  try {
+    const data = await api("/api/support/threads");
+    container.replaceChildren();
+
+    if (!data.threads || data.threads.length === 0) {
+      container.textContent = "Vous n'avez aucune réclamation pour le moment.";
+      return;
+    }
+
+    data.threads.forEach(thread => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "secondary";
+      button.style.display = "block";
+      button.style.width = "100%";
+      button.style.marginBottom = "10px";
+
+      const status = {
+        open: "En attente",
+        in_progress: "En cours",
+        resolved: "Résolue"
+      }[thread.status] || thread.status;
+
+      button.textContent =
+        thread.subject + " — " + status;
+
+      button.addEventListener("click", () => {
+        loadSupportMessages(thread.id);
+      });
+
+      container.appendChild(button);
+    });
+  } catch (error) {
+    container.textContent = error.message;
+  }
+}
+
+async function loadSupportMessages(threadId) {
+  currentSupportThreadId = threadId;
+
+  const conversation = $("supportConversation");
+  const container = $("supportMessages");
+
+  conversation.classList.remove("hidden");
+  container.textContent = "Chargement des messages...";
+
+  try {
+    const data = await api(
+      "/api/support/threads/" + threadId + "/messages"
+    );
+
+    container.replaceChildren();
+
+    data.messages.forEach(message => {
+      const card = document.createElement("div");
+      card.className = "info";
+
+      const sender = document.createElement("strong");
+      sender.textContent =
+        message.sender_role === "admin"
+          ? "Administration WIN CASH"
+          : "Vous";
+
+      const content = document.createElement("p");
+      content.textContent = message.message;
+
+      const date = document.createElement("small");
+      date.textContent =
+        new Date(message.created_at).toLocaleString("fr-FR");
+
+      card.append(sender, content, date);
+      container.appendChild(card);
+    });
+  } catch (error) {
+    container.textContent = error.message;
+  }
+}
+
+document.querySelector('[data-page="support"]')
+  ?.addEventListener("click", loadSupportThreads);
+
+$("supportForm").addEventListener("submit", async event => {
+  event.preventDefault();
+
+  const notice = $("supportNotice");
+  notice.textContent = "Envoi en cours...";
+
+  try {
+    const data = await api("/api/support/threads", {
+      method: "POST",
+      body: JSON.stringify({
+        subject: $("supportSubject").value,
+        message: $("supportMessage").value
+      })
+    });
+
+    $("supportForm").reset();
+    notice.textContent = "Votre réclamation a été envoyée.";
+
+    await loadSupportThreads();
+
+    if (data.thread) {
+      await loadSupportMessages(data.thread.id);
+    }
+  } catch (error) {
+    notice.textContent = error.message;
+  }
+});
+
+$("supportReplyForm").addEventListener("submit", async event => {
+  event.preventDefault();
+
+  if (!currentSupportThreadId) return;
+
+  const reply = $("supportReply").value.trim();
+  if (!reply) return;
+
+  try {
+    await api(
+      "/api/support/threads/" +
+      currentSupportThreadId + "/messages",
+      {
+        method: "POST",
+        body: JSON.stringify({ message: reply })
+      }
+    );
+
+    $("supportReplyForm").reset();
+
+    await loadSupportMessages(currentSupportThreadId);
+    await loadSupportThreads();
+  } catch (error) {
+    alert(error.message);
+  }
+});
+                            
 </script>
 </body>
 </html>
