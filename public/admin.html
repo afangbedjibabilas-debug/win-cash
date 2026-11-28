@@ -128,17 +128,39 @@ button.action{border:0;border-radius:6px;padding:8px 10px;margin:2px;font-weight
 </div>
 </section>
 
+
 <section id="withdrawals" class="tab hidden">
-<div class="panel">
-<h2>Historique des retraits</h2>
-<p class="muted">Consultation uniquement : aucune demande de retrait ne sera validée ici.</p>
-<div class="table-wrap"><table>
-<thead><tr><th>ID</th><th>Membre</th><th>Montant</th><th>Devise</th><th>Statut</th><th>Date</th></tr></thead>
-<tbody id="withdrawalRows"></tbody>
-</table></div>
-<p id="withdrawalEmpty" class="muted hidden">Aucun retrait enregistré.</p>
-</div>
+  <div class="panel">
+    <h2>Gestion des demandes de retrait</h2>
+    <p class="muted">
+      Vérifie les informations Mobile Money avant de valider une demande.
+      La validation confirme le traitement administratif du retrait.
+    </p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Membre</th>
+            <th>Montant</th>
+            <th>Opérateur</th>
+            <th>Numéro Mobile Money</th>
+            <th>Statut</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="withdrawalRows"></tbody>
+      </table>
+    </div>
+
+    <p id="withdrawalEmpty" class="muted hidden">
+      Aucune demande de retrait enregistrée.
+    </p>
+  </div>
 </section>
+
 
 <section id="referrals" class="tab hidden">
 <div class="panel">
