@@ -80,6 +80,7 @@ button.action{border:0;border-radius:6px;padding:8px 10px;margin:2px;font-weight
 
 <button data-tab="referrals">Parrainages</button>
 <button data-tab="history">Historique</button>
+  <button data-tab="support">Réclamations</button>
 <button data-tab="sport">WIN CASH SPORT</button>
 </nav>
 
@@ -160,7 +161,42 @@ button.action{border:0;border-radius:6px;padding:8px 10px;margin:2px;font-weight
 <p id="historyEmpty" class="muted">L'historique sera affiché lorsque son accès sera activé sur le serveur.</p>
 </div>
 </section>
+<section id="support" class="tab hidden">
+  <div class="panel">
+    <h2>Réclamations des membres</h2>
+    <button class="refresh" id="supportRefresh" type="button">
+      Actualiser les réclamations
+    </button>
+    <div id="adminSupportThreads">Chargement...</div>
+  </div>
 
+  <div class="panel hidden" id="adminSupportConversation">
+    <h2 id="adminSupportSubject">Conversation</h2>
+    <div id="adminSupportMessages"></div>
+
+    <form id="adminSupportReplyForm">
+      <label for="adminSupportReply">Répondre au membre</label>
+      <textarea id="adminSupportReply" rows="5"
+        maxlength="5000" required
+        style="width:100%;padding:12px;margin:10px 0;"
+        placeholder="Écrire votre réponse..."></textarea>
+      <button class="refresh" type="submit">
+        Envoyer la réponse
+      </button>
+    </form>
+
+    <label for="adminSupportStatus">Statut de la réclamation</label>
+    <select id="adminSupportStatus"
+      style="width:100%;padding:12px;margin:10px 0;">
+      <option value="open">En attente</option>
+      <option value="in_progress">En cours</option>
+      <option value="resolved">Résolue</option>
+    </select>
+    <button class="refresh" id="adminSupportSaveStatus" type="button">
+      Enregistrer le statut
+    </button>
+  </div>
+</section>
 <section id="sport" class="tab hidden">
 
   <div class="panel">
