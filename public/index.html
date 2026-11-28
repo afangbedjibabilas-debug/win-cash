@@ -533,8 +533,8 @@ async function beginDeposit(){
 const button=$("startDeposit");
 const amount=Number($("depositAmount").value);
 
-if(!Number.isSafeInteger(amount)||amount<3000){
-showDepositMessage("Le dépôt minimum est de 3 000 FCFA.");
+if(!Number.isFinite(amount)||amount<=0){
+showDepositMessage("Veuillez entrer un montant valide dans votre monnaie locale.");
 return;
 }
 
