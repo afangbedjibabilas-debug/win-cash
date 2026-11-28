@@ -360,7 +360,7 @@ module.exports = function installDeposits(
         }
 
 
-        // Phase 1 : Togo uniquement, paiement en XOF.
+        // Dépôts internationaux selon le pays et la devise du membre.
         const client = await pool.connect();
 
         try {
@@ -439,8 +439,8 @@ module.exports = function installDeposits(
             method: "POST",
             body: JSON.stringify({
               amount: amount.toFixed(2),
-              currency: "XOF",
-              country: "TG",
+currency: user.currency,
+country: user.country_code,
               description: "Dépôt portefeuille WIN CASH",
               customer_email: user.email,
               customer_name:
