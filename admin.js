@@ -359,7 +359,24 @@ ALTER TABLE sport_matches
           )
         )
       );
+      CREATE TABLE IF NOT EXISTS sport_loto_entries (
+        id BIGSERIAL PRIMARY KEY,
+        draw_id BIGINT NOT NULL
+          REFERENCES sport_loto_draws(id) ON DELETE RESTRICT,
+        user_id BIGINT NOT NULL
+          REFERENCES users(id) ON DELETE RESTRICT,
+        selected_number INTEGER NOT NULL
+          CHECK (selected_number BETWEEN 1 AND 100),
+        amount_xof BIGINT NOT NULL
+          CHECK (amount_xof >= 1000),
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
 
+      CREATE INDEX IF NOT EXISTS sport_loto_entries_draw_idx
+        ON sport_loto_entries(draw_id, created_at DESC);
+
+      CREATE INDEX IF NOT EXISTS sport_loto_entries_user_idx
+        ON sport_loto_entries(user_id, created_at DESC);
 
       CREATE INDEX IF NOT EXISTS sport_loto_date_idx
         ON sport_loto_draws(draw_date DESC);
