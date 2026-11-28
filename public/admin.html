@@ -863,6 +863,174 @@ el("memberSearch").addEventListener("input",()=>renderMembers(allUsers));
 el("refresh").addEventListener("click",load);
 el("logout").addEventListener("click",logout);
 
+let currentAdminSupportId = null;
+
+async function loadAdminSupportThreads() {
+  const container = el("adminSupportThreads");
+  container.textContent = "Chargement des réclamations...";
+
+  try {
+    const data = await api("/api/admin/support/threads");
+    container.replaceChildren();
+
+    const threads = data.threads || [];
+
+    if (!threads.length) {
+      container.textContent = "Aucune réclamation pour le moment.";
+      return;
+    }
+
+    threads.forEach(thread => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "action gray";
+      button.style.display = "block";
+      button.style.width = "100%";
+      button.style.padding = "12px";
+      button.style.margin = "8px 0";
+
+      const status = {
+        open: "En attente",
+        in_progress: "En cours",
+        resolved: "Résolue"
+      }[thread.status] || thread.status;
+
+      const name = [thread.first_name, thread.last_name]
+        .filter(Boolean).join(" ") || "Membre";
+
+      button.textContent =
+        "#" + thread.id + " — " + name +
+        " — " + thread.subject + " — " + status;
+
+      button.addEventListener("click", () => {
+        openAdminSupportThread(thread);
+      });
+
+      container.appendChild(button);
+    });
+  } catch (e) {
+    container.textContent = e.message;
+  }
+}
+
+async function openAdminSupportThread(thread) {
+  currentAdminSupportId = thread.id;
+
+  el("adminSupportConversation").classList.remove("hidden");
+  el("adminSupportSubject").textContent =
+    thread.subject + " — " +
+    [thread.first_name, thread.last_name]
+      .filter(Boolean).join(" ");
+
+  el("adminSupportStatus").value = thread.status;
+
+  const container = el("adminSupportMessages");
+  container.textContent = "Chargement des messages...";
+
+  try {
+    const data = await api(
+      "/api/admin/support/threads/" +
+      thread.id + "/messages"
+    );
+
+    container.replaceChildren();
+
+    (data.messages || []).forEach(message => {
+      const card = document.createElement("div");
+      card.className = "stat";
+      card.style.margin = "10px 0";
+
+      const sender = document.createElement("strong");
+      sender.textContent =
+        message.sender_role === "admin"
+          ? "Administration WIN CASH"
+          : [message.first_name, message.last_name]
+              .filter(Boolean).join(" ") || "Membre";
+
+      const content = document.createElement("p");
+      content.textContent = message.message;
+
+      const time = document.createElement("small");
+      time.textContent = date(message.created_at);
+
+      card.append(sender, content, time);
+      container.appendChild(card);
+    });
+  } catch (e) {
+    container.textContent = e.message;
+  }
+}
+
+el("supportRefresh").addEventListener(
+  "click",
+  loadAdminSupportThreads
+);
+
+el("adminSupportReplyForm").addEventListener(
+  "submit",
+  async event => {
+    event.preventDefault();
+
+    if (!currentAdminSupportId) return;
+
+    const message = el("adminSupportReply").value.trim();
+    if (!message) return;
+
+    try {
+      await api(
+        "/api/admin/support/threads/" +
+        currentAdminSupportId + "/messages",
+        {
+          method: "POST",
+          body: JSON.stringify({ message })
+        }
+      );
+
+      el("adminSupportReplyForm").reset();
+      notice("Réponse envoyée au membre.");
+
+      await loadAdminSupportThreads();
+
+      const data = await api("/api/admin/support/threads");
+      const thread = (data.threads || []).find(
+        t => Number(t.id) === Number(currentAdminSupportId)
+      );
+
+      if (thread) await openAdminSupportThread(thread);
+    } catch (e) {
+      error(e.message);
+    }
+  }
+);
+
+el("adminSupportSaveStatus").addEventListener(
+  "click",
+  async () => {
+    if (!currentAdminSupportId) return;
+
+    try {
+      await api(
+        "/api/admin/support/threads/" +
+        currentAdminSupportId + "/status",
+        {
+          method: "PATCH",
+          body: JSON.stringify({
+            status: el("adminSupportStatus").value
+          })
+        }
+      );
+
+      notice("Statut de la réclamation mis à jour.");
+      await loadAdminSupportThreads();
+    } catch (e) {
+      error(e.message);
+    }
+  }
+);
+
+document.querySelector('nav button[data-tab="support"]')
+  .addEventListener("click", loadAdminSupportThreads);
+  
 load();
 </script>
 </body>
