@@ -333,10 +333,68 @@ footer{text-align:center;color:var(--muted);font-size:12px;margin:25px}
 </div>
 </div>
 
+
 <div id="page-withdraw" class="hidden">
-<h2 class="page-heading">Retrait</h2>
-<div class="notice">Les retraits ne sont pas encore activés.</div>
+<h2 class="page-heading">Effectuer un retrait</h2>
+
+<div class="card">
+  <h3>Mon portefeuille WIN CASH</h3>
+  <div class="info">
+    Solde disponible :
+    <strong id="withdrawBalance">0 FCFA</strong>
+  </div>
+
+  <div class="notice">
+    Retrait minimum : 5 000 FCFA.
+    Le montant demandé sera déduit immédiatement de ton solde.
+    La demande restera en attente jusqu'à la décision de l'administration.
+  </div>
+
+  <label for="withdrawAmount">Montant du retrait (FCFA)</label>
+  <input
+    id="withdrawAmount"
+    type="number"
+    min="5000"
+    step="1"
+    placeholder="Exemple : 5000"
+  >
+
+  <label for="withdrawProvider">Opérateur Mobile Money</label>
+  <select id="withdrawProvider">
+    <option value="">Choisir un opérateur</option>
+    <option value="TMoney">TMoney</option>
+    <option value="Flooz">Flooz</option>
+    <option value="MTN MoMo">MTN MoMo</option>
+    <option value="Moov Money">Moov Money</option>
+    <option value="Orange Money">Orange Money</option>
+    <option value="Airtel Money">Airtel Money</option>
+    <option value="Wave">Wave</option>
+    <option value="Autre">Autre</option>
+  </select>
+
+  <label for="withdrawNumber">Numéro Mobile Money</label>
+  <input
+    id="withdrawNumber"
+    type="tel"
+    maxlength="30"
+    placeholder="Entre ton numéro de paiement"
+  >
+
+  <button id="submitWithdrawal" type="button" style="width:100%;margin-top:15px">
+    Envoyer ma demande de retrait
+  </button>
+
+  <div id="withdrawMessage" class="notice" style="display:none" role="status"></div>
 </div>
+
+<div class="card">
+  <h3>Historique de mes retraits</h3>
+  <div id="withdrawalHistory">
+    <p class="muted">Aucune demande chargée.</p>
+  </div>
+</div>
+</div>
+
 
 <div id="page-referral" class="hidden">
 <h2 class="page-heading">Mon code parrainage</h2>
@@ -460,8 +518,11 @@ updateDepositInfo();
 loadWalletBalance().catch(e=>showDepositMessage(e.message));
 if(currentDepositId)$("checkDeposit").style.display="block";
 }
+if(name==="withdraw"&&currentUser){
+loadWithdrawalBalance().catch(e=>showWithdrawalMessage(e.message));
+loadWithdrawalHistory();
+  }
 }
-
 function render(user){
 currentUser=user;
 $("auth").classList.add("hidden");
@@ -683,6 +744,125 @@ const n=Number(d.balanceXof||0);
 $("walletBalance").textContent=n.toLocaleString("fr-FR")+" FCFA";
 $("dashboardWalletBalance").textContent="XOF "+n.toLocaleString("fr-FR");
 }
+  
+function showWithdrawalMessage(message) {
+  const box = $("withdrawMessage");
+  box.textContent = message;
+  box.style.display = "block";
+}
+
+async function loadWithdrawalBalance() {
+  const d = await api("/api/payments/wallet");
+  const balance = Number(d.balanceXof || 0);
+
+  $("withdrawBalance").textContent =
+    balance.toLocaleString("fr-FR") + " FCFA";
+}
+
+async function loadWithdrawalHistory() {
+  const container = $("withdrawalHistory");
+  container.textContent = "Chargement...";
+
+  try {
+    const d = await api("/api/withdrawals/mine");
+    container.replaceChildren();
+
+    if (!d.withdrawals || d.withdrawals.length === 0) {
+      container.textContent = "Aucun retrait enregistré.";
+      return;
+    }
+
+    d.withdrawals.forEach(item => {
+      const card = document.createElement("div");
+      card.className = "info";
+
+      const amount = document.createElement("strong");
+      amount.textContent =
+        Number(item.amount).toLocaleString("fr-FR") + " FCFA";
+
+      const details = document.createElement("p");
+      details.textContent =
+        "Opérateur : " + item.mobile_money_provider +
+        " | Numéro : " + item.mobile_money_number;
+
+      const status = document.createElement("p");
+      const labels = {
+        pending: "En attente",
+        validated: "Validé",
+        failed: "Échoué"
+      };
+
+      status.textContent =
+        "Statut : " + (labels[item.status] || item.status);
+
+      const date = document.createElement("small");
+      date.textContent =
+        new Date(item.created_at).toLocaleString("fr-FR");
+
+      card.append(amount, details, status, date);
+      container.appendChild(card);
+    });
+  } catch (error) {
+    container.textContent = error.message;
+  }
+}
+
+async function submitWithdrawal() {
+  const button = $("submitWithdrawal");
+  const amount = Number($("withdrawAmount").value);
+  const provider = $("withdrawProvider").value;
+  const number = $("withdrawNumber").value.trim();
+
+  $("withdrawMessage").style.display = "none";
+
+  if (!Number.isSafeInteger(amount) || amount < 5000) {
+    showWithdrawalMessage("Le retrait minimum est de 5 000 FCFA.");
+    return;
+  }
+
+  if (!provider || !number) {
+    showWithdrawalMessage("Choisis ton opérateur et entre ton numéro.");
+    return;
+  }
+
+  if (!confirm(
+    "Confirmer une demande de retrait de " +
+    amount.toLocaleString("fr-FR") + " FCFA ?"
+  )) {
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = "Envoi en cours...";
+
+  try {
+    const d = await api("/api/withdrawals", {
+      method: "POST",
+      body: JSON.stringify({
+        amount: amount,
+        mobileMoneyProvider: provider,
+        mobileMoneyNumber: number
+      })
+    });
+
+    $("withdrawAmount").value = "";
+    $("withdrawProvider").value = "";
+    $("withdrawNumber").value = "";
+
+    showWithdrawalMessage(d.message);
+
+    await loadWithdrawalBalance();
+    await loadWalletBalance();
+    await loadWithdrawalHistory();
+
+  } catch (error) {
+    showWithdrawalMessage(error.message);
+  } finally {
+    button.disabled = false;
+    button.textContent = "Envoyer ma demande de retrait";
+  }
+      }
+  
 function updateDepositInfo(){
 const currency=currentUser&&currentUser.currency;
 
@@ -897,6 +1077,7 @@ b.addEventListener("click",()=>openPage(b.dataset.page));
 
 $("startDeposit").addEventListener("click",beginDeposit);
 $("checkDeposit").addEventListener("click",checkDeposit);
+  $("submitWithdrawal").addEventListener("click",submitWithdrawal);
 $("startActivation").addEventListener("click",beginActivation);
 $("verifyActivation").addEventListener("click",verifyActivation);
 $("logout").addEventListener("click",logout);
