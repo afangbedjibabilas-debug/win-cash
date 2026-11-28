@@ -373,6 +373,7 @@ b.classList.toggle("active",b.dataset.page===name);
 });
 
 if(name==="deposit"&&currentUser){
+updateDepositInfo();
 loadWalletBalance().catch(e=>showDepositMessage(e.message));
 if(currentDepositId)$("checkDeposit").style.display="block";
 }
@@ -528,7 +529,35 @@ const n=Number(d.balanceXof||0);
 $("walletBalance").textContent=n.toLocaleString("fr-FR")+" FCFA";
 $("dashboardWalletBalance").textContent="XOF "+n.toLocaleString("fr-FR");
 }
+function updateDepositInfo(){
+const currency=currentUser&&currentUser.currency;
 
+const minimums={
+XOF:3000,
+XAF:3000,
+NGN:6802,
+GHS:59.45,
+GNF:44517
+};
+
+const minimum=minimums[currency];
+
+if(!minimum){
+$("depositMinimum").textContent="Devise non prise en charge";
+$("depositCountryInfo").textContent="Veuillez contacter le support.";
+return;
+}
+
+$("depositMinimum").textContent=
+"Dépôt minimum : "+minimum.toLocaleString("fr-FR")+" "+currency;
+
+$("depositCountryInfo").textContent=
+"Paiement dans votre monnaie locale. Votre Solde Fortune reste en FCFA.";
+
+$("depositAmount").min=minimum;
+$("depositAmount").placeholder="Minimum : "+minimum+" "+currency;
+$("depositAmountLabel").textContent="Montant du dépôt ("+currency+")";
+  }
 async function beginDeposit(){
 const button=$("startDeposit");
 const amount=Number($("depositAmount").value);
